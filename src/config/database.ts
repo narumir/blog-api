@@ -17,7 +17,7 @@ import {
 } from "./ssm.service";
 
 const defaultOptions: TypeOrmModuleOptions = {
-  "type": "postgres",
+  type: "postgres",
   database: "blog",
   schema: "public",
   synchronize: process.env.NODE_ENV !== "production",

@@ -1,9 +1,14 @@
 import {
   Module,
 } from '@nestjs/common';
+import {
+  EnvConfig,
+} from './config';
 
 @Module({
-  imports: [],
+  imports: [
+    EnvConfig,
+  ],
   controllers: [],
   providers: [],
 })

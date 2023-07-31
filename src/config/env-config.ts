@@ -5,6 +5,7 @@ import {
 
 const config: ConfigFactory = () => ({
   port: 4000,
+  region: "ap-northeast-2",
 });
 
 export const EnvConfig = ConfigModule.forRoot({

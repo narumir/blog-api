@@ -1,3 +1,5 @@
+import crypto from "crypto";
+import argon from "argon2";
 import {
   Injectable,
 } from "@nestjs/common";
@@ -20,4 +22,22 @@ export class UserService {
     private readonly userRepository: Repository<User>,
   ) { }
 
+  findOneByUsername(username: string) {
+    return this.readonlyUserRepository.findOne({
+      where: {
+        username,
+      },
+    });
+  }
+
+  async createUser(username: string, password: string, nickname: string) {
+    const user = new User();
+    user.username = username;
+    const salt = crypto.randomBytes(32);
+    user.salt = salt.toString("hex");
+    const encryptedPasswrod = await argon.hash(password, { salt, type: argon.argon2id, raw: true });
+    user.password = encryptedPasswrod;
+    user.nickname = nickname;
+    return this.userRepository.save(user);
+  }
 }

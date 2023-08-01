@@ -7,6 +7,7 @@ import {
   TypeOrmModuleOptions,
 } from "@nestjs/typeorm";
 import {
+  AuthToken,
   User,
 } from "src/entities";
 import {
@@ -23,6 +24,7 @@ const defaultOptions: TypeOrmModuleOptions = {
   synchronize: process.env.NODE_ENV !== "production",
   entities: [
     User,
+    AuthToken,
   ],
 };
 

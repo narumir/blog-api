@@ -16,6 +16,7 @@ export class User extends BaseEntity {
     nullable: false,
     type: "varchar",
     length: 320,
+    unique: true,
   })
   username: string;
 

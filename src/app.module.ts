@@ -1,5 +1,8 @@
 import {
+  MiddlewareConsumer,
   Module,
+  NestModule,
+  RequestMethod,
 } from '@nestjs/common';
 import {
   RouterModule,
@@ -13,12 +16,25 @@ import {
 import {
   UserModule,
 } from './user/user.module';
+import {
+  JWTMiddleware,
+} from './auth/jwt/jwt.middleware';
+import {
+  JWTModule,
+} from './auth/jwt/jwt.module';
+import {
+  AuthModule,
+} from './auth/auth.module';
 
 const Routes = RouterModule.register([
   {
     path: "user",
     module: UserModule,
   },
+  {
+    path: "auth",
+    module: AuthModule,
+  }
 ]);
 
 @Module({
@@ -28,7 +44,18 @@ const Routes = RouterModule.register([
     ReadonlyDatabase,
     WritableDatabase,
     Routes,
+    JWTModule,
     UserModule,
+    AuthModule,
   ],
 })
-export class AppModule { }
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(JWTMiddleware)
+      .forRoutes({
+        path: "*",
+        method: RequestMethod.ALL,
+      })
+  }
+}

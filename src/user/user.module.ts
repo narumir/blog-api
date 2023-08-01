@@ -19,6 +19,9 @@ import {
     TypeOrmModule.forFeature([User], "readonly"),
     TypeOrmModule.forFeature([User], "writable"),
   ],
+  exports: [
+    UserService,
+  ],
   controllers: [
     UserController,
   ],

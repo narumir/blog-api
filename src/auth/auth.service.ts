@@ -1,4 +1,3 @@
-import argon from "argon2";
 import {
   Injectable,
 } from "@nestjs/common";
@@ -32,10 +31,8 @@ export class AuthService {
     private readonly tokenRepository: Repository<AuthToken>,
   ) { }
 
-  async verifyPassword(user: User, password: string) {
-    const salt = Buffer.from(user.salt, "hex");
-    const encryptedPasswrod = await argon.hash(password, { salt, type: argon.argon2id, raw: true });
-    return user.password.compare(encryptedPasswrod) === 1;
+  findOneByToken(token: string) {
+    return this.readonlyTokenRepository.findOne({ where: { token } });
   }
 
   saveRefreshToken(user: User, token: string, expiredAt: Date, agent: string, ip: string) {

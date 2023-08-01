@@ -23,11 +23,17 @@ export class UserService {
   ) { }
 
   findOneByUsername(username: string) {
-    return this.readonlyUserRepository.findOne({
-      where: {
-        username,
-      },
-    });
+    return this.readonlyUserRepository.findOneBy({ username });
+  }
+
+  findOneByID(id: string) {
+    return this.readonlyUserRepository.findOneBy({ id });
+  }
+
+  async verifyPassword(user: User, password: string) {
+    const salt = Buffer.from(user.salt, "hex");
+    const encryptedPasswrod = await argon.hash(password, { salt, type: argon.argon2id, raw: true });
+    return user.password.compare(encryptedPasswrod) === 1;
   }
 
   async createUser(username: string, password: string, nickname: string) {

@@ -27,7 +27,12 @@ export class JWTMiddleware implements NestMiddleware {
     if (authType.toLowerCase() !== "bearer") {
       throw new BadRequestException("Unsupport authorization type.");
     }
-    const decode: Object = await this.jwtService.verifyAsync(accessToken);
+    let decode: Object;
+    try {
+      decode = await this.jwtService.verifyAsync(accessToken);
+    } catch (e) {
+      throw new UnauthorizedException();
+    }
     if (typeof decode !== "object" || !decode.hasOwnProperty("sub")) {
       throw new UnauthorizedException();
     }

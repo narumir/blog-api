@@ -7,6 +7,9 @@ import {
   Req,
   Res,
 } from "@nestjs/common";
+import {
+  ApiBody,
+} from "@nestjs/swagger";
 import type {
   Request,
   Response,
@@ -29,7 +32,8 @@ export class AuthController {
     private readonly authService: AuthService,
     private readonly userService: UserService,
   ) { }
-
+  
+  @ApiBody({ type: JoinDTO })
   @Post("join")
   async join(
     @Req()
@@ -52,6 +56,7 @@ export class AuthController {
     return { accessToken };
   }
 
+  @ApiBody({ type: SignInDTO })
   @Post("signin")
   async signin(
     @Req()

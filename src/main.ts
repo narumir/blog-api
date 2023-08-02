@@ -22,6 +22,21 @@ const bootstrap = async () => {
   const port = configService.get<number>("port");
   app.useGlobalPipes(new ValidationPipe());
   app.use(cookieParser());
+  app.enableCors({
+    origin: (origin, callback) => {
+      if (process.env.NODE_ENV !== "production") {
+        return callback(null, true);
+      }
+      if (/^https?:\/\/(?:[^.]*\.)?narumir\.io(?:\/|$)/.test(origin)) {
+        return callback(null, true);
+      }
+      callback(new Error('Not allowed by CORS'), false);
+    },
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    credentials: true,
+    optionsSuccessStatus: 204,
+    preflightContinue: false,
+  });
   if (process.env.NODE_ENV !== "production") {
     const swaggerConfig = new DocumentBuilder()
       .setTitle("blog api")

@@ -27,13 +27,7 @@ const bootstrap = async () => {
     .use(helmet())
     .enableCors({
       origin: (origin, callback) => {
-        if (process.env.NODE_ENV !== "production") {
-          return callback(null, true);
-        }
-        if (/^https?:\/\/(?:[^.]*\.)?narumir\.io(?:\/|$)/.test(origin)) {
-          return callback(null, true);
-        }
-        callback(new Error('Not allowed by CORS'), false);
+        callback(null, true);
       },
       methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
       credentials: true,

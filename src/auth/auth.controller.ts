@@ -14,9 +14,9 @@ import {
   ApiBody,
 } from "@nestjs/swagger";
 import type {
-  Request,
-  Response,
-} from "express";
+  FastifyRequest,
+  FastifyReply,
+} from "fastify";
 import {
   UserService,
 } from "src/user/user.service";
@@ -41,9 +41,9 @@ export class AuthController {
   @Post("join")
   async join(
     @Req()
-    req: Request,
+    req: FastifyRequest,
     @Res({ passthrough: true })
-    res: Response,
+    res: FastifyReply,
     @Body()
     body: JoinDTO,
   ) {
@@ -56,7 +56,7 @@ export class AuthController {
     const { accessToken } = await this.authService.issueAccessToken(newUser);
     const { agent, ip } = this.authService.getAgentAndIP(req);
     await this.authService.saveRefreshToken(newUser, refreshToken, expiredAt, agent, ip);
-    res.cookie("x-token", refreshToken, { httpOnly: true, secure: this.secure, expires: expiredAt });
+    res.setCookie("x-token", refreshToken, { httpOnly: true, secure: this.secure, expires: expiredAt });
     return { accessToken };
   }
 
@@ -64,9 +64,9 @@ export class AuthController {
   @Post("signin")
   async signin(
     @Req()
-    req: Request,
+    req: FastifyRequest,
     @Res({ passthrough: true })
-    res: Response,
+    res: FastifyReply,
     @Body()
     body: SignInDTO,
   ) {
@@ -81,12 +81,15 @@ export class AuthController {
     const { accessToken } = await this.authService.issueAccessToken(user);
     const { agent, ip } = this.authService.getAgentAndIP(req);
     await this.authService.saveRefreshToken(user, refreshToken, expiredAt, agent, ip);
-    res.cookie("x-token", refreshToken, { httpOnly: true, secure: this.secure, expires: expiredAt });
+    res.setCookie("x-token", refreshToken, { httpOnly: true, secure: this.secure, expires: expiredAt });
     return { accessToken };
   }
 
   @Post("access-token")
-  async renewAccessToken(@Req() req: Request) {
+  async renewAccessToken(
+    @Req()
+    req: FastifyRequest,
+  ) {
     const refreshToken = req.cookies["x-token"] as string;
     try {
       const decode = await this.jwtService.verifyAsync(refreshToken);
@@ -108,9 +111,9 @@ export class AuthController {
   @Post("refresh-token")
   async renewRefreshToken(
     @Req()
-    req: Request,
+    req: FastifyRequest,
     @Res({ passthrough: true })
-    res: Response,
+    res: FastifyReply,
   ) {
     const currentRefreshToken = req.cookies["x-token"] as string;
     try {
@@ -126,7 +129,7 @@ export class AuthController {
       const { refreshToken, expiredAt } = await this.authService.issueRefreshToken(user);
       const { agent, ip } = this.authService.getAgentAndIP(req);
       await this.authService.saveRefreshToken(user, refreshToken, expiredAt, agent, ip);
-      res.cookie("x-token", refreshToken, { httpOnly: true, secure: this.secure, expires: expiredAt });
+      res.setCookie("x-token", refreshToken, { httpOnly: true, secure: this.secure, expires: expiredAt });
     } catch (e) {
       throw new HttpException("fail to renew refresh token.", HttpStatus.UNAUTHORIZED);
     }

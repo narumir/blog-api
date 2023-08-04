@@ -1,5 +1,5 @@
-import cookieParser from 'cookie-parser';
-import helmet from 'helmet';
+import helmet from '@fastify/helmet'
+import fastifyCookie from '@fastify/cookie';
 import {
   NestFactory,
 } from '@nestjs/core';
@@ -14,17 +14,22 @@ import {
   SwaggerModule,
 } from '@nestjs/swagger';
 import {
+  FastifyAdapter,
+  NestFastifyApplication,
+} from '@nestjs/platform-fastify';
+import {
   AppModule,
 } from './app.module';
 
 const bootstrap = async () => {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter());
+  await app.init();
+  await app.register(fastifyCookie);
+  await app.register(helmet);
   const configService = app.get(ConfigService);
   const port = configService.get<number>("port");
   app
     .useGlobalPipes(new ValidationPipe())
-    .use(cookieParser())
-    .use(helmet())
     .enableCors({
       origin: (origin, callback) => {
         callback(null, true);

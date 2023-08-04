@@ -14,8 +14,8 @@ import {
   UAParser,
 } from "ua-parser-js";
 import type {
-  Request,
-} from "express";
+  FastifyRequest,
+} from "fastify";
 import {
   AuthToken,
   User,
@@ -77,7 +77,7 @@ export class AuthService {
     };
   }
 
-  getAgentAndIP(req: Request) {
+  getAgentAndIP(req: FastifyRequest) {
     const agent = req.headers["user-agent"];
     const ip = req.headers["cf-connecting-ip"] as string
       ?? req.headers["x-forwarded-for"] as string

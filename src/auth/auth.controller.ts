@@ -17,6 +17,9 @@ import type {
   FastifyRequest,
   FastifyReply,
 } from "fastify";
+import type {
+  CookieSerializeOptions,
+} from "@fastify/cookie";
 import {
   UserService,
 } from "src/user/user.service";
@@ -31,6 +34,9 @@ import {
 @Controller()
 export class AuthController {
   private readonly secure = process.env.NODE_ENV === "production";
+  private readonly domain = process.env.NODE_ENV === "production" ? ".narumir.io" : undefined;
+  private readonly defaultCookieOptions: CookieSerializeOptions = { secure: this.secure, domain: this.domain, path: "/", sameSite: "lax" };
+
   constructor(
     private readonly authService: AuthService,
     private readonly userService: UserService,
@@ -52,11 +58,12 @@ export class AuthController {
       throw new HttpException("User already exists.", HttpStatus.CONFLICT);
     }
     const newUser = await this.userService.createUser(body.username, body.password, body.nickname);
-    const { refreshToken, expiredAt } = await this.authService.issueRefreshToken(newUser);
-    const { accessToken } = await this.authService.issueAccessToken(newUser);
+    const { refreshToken, expiredAt: refreshTokenExpiredAt } = await this.authService.issueRefreshToken(newUser);
+    const { accessToken, expiredAt: accessTokenExpiredAt } = await this.authService.issueAccessToken(newUser);
     const { agent, ip } = this.authService.getAgentAndIP(req);
-    await this.authService.saveRefreshToken(newUser, refreshToken, expiredAt, agent, ip);
-    res.setCookie("x-token", refreshToken, { httpOnly: true, secure: this.secure, expires: expiredAt });
+    await this.authService.saveRefreshToken(newUser, refreshToken, refreshTokenExpiredAt, agent, ip);
+    res.setCookie("x-token", refreshToken, { expires: refreshTokenExpiredAt, httpOnly: true, ...this.defaultCookieOptions });
+    res.setCookie("a-token", accessToken, { expires: accessTokenExpiredAt, httpOnly: false, ...this.defaultCookieOptions });
     return { accessToken };
   }
 
@@ -77,11 +84,12 @@ export class AuthController {
     if (!this.userService.verifyPassword(user, body.password)) {
       throw new HttpException("fail to signin.", HttpStatus.UNAUTHORIZED);
     }
-    const { refreshToken, expiredAt } = await this.authService.issueRefreshToken(user);
-    const { accessToken } = await this.authService.issueAccessToken(user);
+    const { refreshToken, expiredAt: refreshTokenExpiredAt } = await this.authService.issueRefreshToken(user);
+    const { accessToken, expiredAt: accessTokenExpiredAt } = await this.authService.issueAccessToken(user);
     const { agent, ip } = this.authService.getAgentAndIP(req);
-    await this.authService.saveRefreshToken(user, refreshToken, expiredAt, agent, ip);
-    res.setCookie("x-token", refreshToken, { httpOnly: true, secure: this.secure, expires: expiredAt });
+    await this.authService.saveRefreshToken(user, refreshToken, refreshTokenExpiredAt, agent, ip);
+    res.setCookie("x-token", refreshToken, { expires: refreshTokenExpiredAt, httpOnly: true, ...this.defaultCookieOptions });
+    res.setCookie("a-token", accessToken, { expires: accessTokenExpiredAt, httpOnly: false, ...this.defaultCookieOptions });
     return { accessToken };
   }
 
@@ -89,6 +97,8 @@ export class AuthController {
   async renewAccessToken(
     @Req()
     req: FastifyRequest,
+    @Res({ passthrough: true })
+    res: FastifyReply,
   ) {
     const refreshToken = req.cookies["x-token"] as string;
     try {
@@ -101,7 +111,8 @@ export class AuthController {
       if (user == null) {
         throw new Error("user not exists.");
       }
-      const { accessToken } = await this.authService.issueAccessToken(user);
+      const { accessToken, expiredAt: accessTokenExpiredAt } = await this.authService.issueAccessToken(user);
+      res.setCookie("a-token", accessToken, { expires: accessTokenExpiredAt, httpOnly: false, ...this.defaultCookieOptions });
       return { accessToken };
     } catch (e) {
       throw new HttpException("fail to renew access token.", HttpStatus.UNAUTHORIZED);
@@ -129,7 +140,7 @@ export class AuthController {
       const { refreshToken, expiredAt } = await this.authService.issueRefreshToken(user);
       const { agent, ip } = this.authService.getAgentAndIP(req);
       await this.authService.saveRefreshToken(user, refreshToken, expiredAt, agent, ip);
-      res.setCookie("x-token", refreshToken, { httpOnly: true, secure: this.secure, expires: expiredAt });
+      res.setCookie("x-token", refreshToken, { expires: expiredAt, httpOnly: true, ...this.defaultCookieOptions });
     } catch (e) {
       throw new HttpException("fail to renew refresh token.", HttpStatus.UNAUTHORIZED);
     }

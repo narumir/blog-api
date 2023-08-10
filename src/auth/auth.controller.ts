@@ -15,9 +15,6 @@ import {
 import type {
   FastifyRequest,
 } from "fastify";
-import type {
-  CookieSerializeOptions,
-} from "@fastify/cookie";
 import {
   UserService,
 } from "src/user/user.service";
@@ -34,10 +31,6 @@ import {
 
 @Controller()
 export class AuthController {
-  private readonly secure = process.env.NODE_ENV === "production";
-  private readonly domain = process.env.NODE_ENV === "production" ? ".narumir.io" : undefined;
-  private readonly defaultCookieOptions: CookieSerializeOptions = { secure: this.secure, domain: this.domain, path: "/", sameSite: "lax" };
-
   constructor(
     private readonly authService: AuthService,
     private readonly userService: UserService,

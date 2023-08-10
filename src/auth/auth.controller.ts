@@ -24,6 +24,7 @@ import {
 import {
   JoinDTO,
   SignInDTO,
+  TokenDTO,
 } from "./dto";
 import {
   AuthService,
@@ -81,15 +82,15 @@ export class AuthController {
     return { accessToken, accessTokenExpiredAt, refreshToken, refreshTokenExpiredAt };
   }
 
+  @ApiBody({ type: TokenDTO })
   @Post("access-token")
   async renewAccessToken(
-    @Req()
-    req: FastifyRequest,
+    @Body()
+    body: TokenDTO,
   ) {
-    const refreshToken = req.cookies["x-token"] as string;
     try {
-      const decode = await this.jwtService.verifyAsync(refreshToken);
-      const exists = await this.authService.findOneByToken(refreshToken);
+      const decode = await this.jwtService.verifyAsync(body.token);
+      const exists = await this.authService.findOneByToken(body.token);
       if (exists == null) {
         throw new Error("token not exists.");
       }
@@ -108,11 +109,12 @@ export class AuthController {
   async renewRefreshToken(
     @Req()
     req: FastifyRequest,
+    @Body()
+    body: TokenDTO,
   ) {
-    const currentRefreshToken = req.cookies["x-token"] as string;
     try {
-      const decode = await this.jwtService.verifyAsync(currentRefreshToken);
-      const exists = await this.authService.findOneByToken(currentRefreshToken);
+      const decode = await this.jwtService.verifyAsync(body.token);
+      const exists = await this.authService.findOneByToken(body.token);
       if (exists == null) {
         throw new Error("token not exists.");
       }

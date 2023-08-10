@@ -33,7 +33,7 @@ export class UserService {
   async verifyPassword(user: User, password: string) {
     const salt = Buffer.from(user.salt, "hex");
     const encryptedPasswrod = await argon.hash(password, { salt, type: argon.argon2id, raw: true });
-    return user.password.compare(encryptedPasswrod) === 1;
+    return user.password.equals(encryptedPasswrod);
   }
 
   async createUser(username: string, password: string, nickname: string) {

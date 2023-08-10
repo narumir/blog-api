@@ -22,6 +22,9 @@ import {
 import {
   AuthModule,
 } from './auth/auth.module';
+import {
+  EncryptModule,
+} from './encrypt/encrypt.module';
 
 const Routes = RouterModule.register([
   {
@@ -31,7 +34,11 @@ const Routes = RouterModule.register([
   {
     path: "auth",
     module: AuthModule,
-  }
+  },
+  {
+    path: "encrypt",
+    module: EncryptModule,
+  },
 ]);
 
 @Module({
@@ -44,6 +51,7 @@ const Routes = RouterModule.register([
     JWTModule,
     UserModule,
     AuthModule,
+    EncryptModule,
   ],
 })
 export class AppModule { }

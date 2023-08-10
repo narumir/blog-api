@@ -24,6 +24,9 @@ import {
   UserService,
 } from "src/user/user.service";
 import {
+  EncryptService,
+} from "src/encrypt/encrypt.service";
+import {
   JoinDTO,
   SignInDTO,
 } from "./dto";
@@ -41,6 +44,7 @@ export class AuthController {
     private readonly authService: AuthService,
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
+    private readonly encryptService: EncryptService,
   ) { }
 
   @ApiBody({ type: JoinDTO })
@@ -81,7 +85,8 @@ export class AuthController {
     if (user == null) {
       throw new HttpException("fail to signin.", HttpStatus.UNAUTHORIZED);
     }
-    if (!this.userService.verifyPassword(user, body.password)) {
+    const password = this.encryptService.decode(body.password);
+    if (await this.userService.verifyPassword(user, password) == false) {
       throw new HttpException("fail to signin.", HttpStatus.UNAUTHORIZED);
     }
     const { refreshToken, expiredAt: refreshTokenExpiredAt } = await this.authService.issueRefreshToken(user);

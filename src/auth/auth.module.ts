@@ -11,6 +11,9 @@ import {
   UserModule,
 } from "src/user/user.module";
 import {
+  EncryptModule,
+} from "src/encrypt/encrypt.module";
+import {
   AuthController,
 } from "./auth.controller";
 import {
@@ -24,6 +27,7 @@ import {
   imports: [
     JWTModule,
     UserModule,
+    EncryptModule,
     TypeOrmModule.forFeature([AuthToken], "readonly"),
     TypeOrmModule.forFeature([AuthToken], "writable"),
   ],

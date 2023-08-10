@@ -77,6 +77,11 @@ export class AuthService {
     };
   }
 
+  async discardRefreshToken(token: string) {
+    const auth = await this.readonlyTokenRepository.findOneBy({ token });
+    await this.tokenRepository.remove(auth);
+  }
+
   getAgentAndIP(req: FastifyRequest) {
     const agent = req.headers["user-agent"];
     const ip = req.headers["cf-connecting-ip"] as string

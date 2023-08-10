@@ -83,6 +83,16 @@ export class AuthController {
   }
 
   @ApiBody({ type: TokenDTO })
+  @Post("signout")
+  async signout(
+    @Body()
+    body: TokenDTO,
+  ) {
+    await this.authService.discardRefreshToken(body.token);
+    return { success: true };
+  }
+
+  @ApiBody({ type: TokenDTO })
   @Post("access-token")
   async renewAccessToken(
     @Body()
@@ -125,6 +135,7 @@ export class AuthController {
       const { refreshToken, expiredAt: refreshTokenExpiredAt } = await this.authService.issueRefreshToken(user);
       const { agent, ip } = this.authService.getAgentAndIP(req);
       await this.authService.saveRefreshToken(user, refreshToken, refreshTokenExpiredAt, agent, ip);
+      await this.authService.discardRefreshToken(body.token);
       return { refreshToken, refreshTokenExpiredAt };
     } catch (e) {
       throw new HttpException("fail to renew refresh token.", HttpStatus.UNAUTHORIZED);

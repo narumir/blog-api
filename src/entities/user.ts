@@ -1,10 +1,14 @@
 import {
   Column,
   Entity,
+  OneToMany,
 } from "typeorm";
 import {
   BaseEntity,
 } from "./base-entity";
+import {
+  AuthToken,
+} from "src/entities";
 
 @Entity({
   name: "user",
@@ -42,4 +46,7 @@ export class User extends BaseEntity {
     length: 32,
   })
   nickname: string;
+
+  @OneToMany(() => AuthToken, (token) => token.user, { onDelete: "CASCADE" })
+  tokens: AuthToken[];
 }

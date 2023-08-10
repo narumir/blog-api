@@ -1,6 +1,7 @@
 import {
   Column,
   Entity,
+  JoinColumn,
   ManyToOne,
 } from "typeorm";
 import {
@@ -69,5 +70,6 @@ export class AuthToken extends BaseEntity {
   expiredAt: Date;
 
   @ManyToOne(() => User, (user) => user.id)
+  @JoinColumn({ name: "user_id" })
   user: User;
 }

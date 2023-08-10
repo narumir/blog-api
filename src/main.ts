@@ -23,7 +23,6 @@ import {
 
 const bootstrap = async () => {
   const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter());
-  await app.init();
   await app.register(fastifyCookie);
   await app.register(helmet);
   const configService = app.get(ConfigService);
@@ -48,6 +47,7 @@ const bootstrap = async () => {
     const document = SwaggerModule.createDocument(app, swaggerConfig);
     SwaggerModule.setup("api", app, document);
   }
+  await app.init();
   await app.listen(port);
 };
 

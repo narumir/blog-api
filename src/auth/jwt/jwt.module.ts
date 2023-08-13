@@ -20,7 +20,7 @@ export const JWTModule = JwtModule.registerAsync({
     SSMService,
   ],
   useFactory: async (configService: ConfigService, ssmService: SSMService) => {
-    const parameters = await ssmService.getParameters();
+    const parameters = await ssmService.getAuthParameters();
     return {
       global: true,
       signOptions: {

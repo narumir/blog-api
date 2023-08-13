@@ -38,7 +38,7 @@ export const ReadonlyDatabase = TypeOrmModule.forRootAsync({
     SSMService,
   ],
   useFactory: async (configService: ConfigService, ssmService: SSMService): Promise<TypeOrmModuleOptions> => {
-    const parameters = await ssmService.getReadonlyDatabaseParameter();
+    const parameters = await ssmService.getReadonlyDatabaseParameters();
     return {
       name: "readonly",
       host: parameters["db_readonly_host"] ?? configService.get("db_readonly_host"),
@@ -62,7 +62,7 @@ export const WritableDatabase = TypeOrmModule.forRootAsync({
     SSMService,
   ],
   useFactory: async (configService: ConfigService, ssmService: SSMService): Promise<TypeOrmModuleOptions> => {
-    const parameters = await ssmService.getWritableDatabaseParameter();
+    const parameters = await ssmService.getWritableDatabaseParameters();
     return {
       name: "writable",
       host: parameters["db_writable_host"] ?? configService.get("db_writable_host"),

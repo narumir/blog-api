@@ -49,7 +49,7 @@ export class SSMService {
     );
   }
 
-  getReadonlyDatabaseParameter() {
+  getReadonlyDatabaseParameters() {
     return this.getParameters(
       "db_readonly_host",
       "db_readonly_port",
@@ -58,12 +58,19 @@ export class SSMService {
     );
   }
 
-  getWritableDatabaseParameter() {
+  getWritableDatabaseParameters() {
     return this.getParameters(
       "db_writable_host",
       "db_writable_port",
       "db_writable_username",
       "db_writable_password",
+    );
+  }
+
+  getAuthParameters() {
+    return this.getParameters(
+      "jwt_expires_in",
+      "jwt_secret",
     );
   }
 }

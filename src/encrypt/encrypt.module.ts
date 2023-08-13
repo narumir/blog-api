@@ -24,7 +24,7 @@ const KeyProvider: Provider = {
     SSMService,
   ],
   useFactory: async (configService: ConfigService, ssmService: SSMService) => {
-    const parameters = await ssmService.getParameters();
+    const parameters = await ssmService.getEncryptParameters();
     return {
       publicKey: (parameters["rsa_public_key"] ?? configService.get("rsa_public_key")).replace(/\\n/g, '\n'),
       privateKey: (parameters["rsa_private_key"] ?? configService.get("rsa_private_key")).replace(/\\n/g, '\n'),

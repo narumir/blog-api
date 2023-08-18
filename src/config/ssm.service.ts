@@ -70,7 +70,8 @@ export class SSMService {
   getAuthParameters() {
     return this.getParameters(
       "jwt_expires_in",
-      "jwt_secret",
+      "jwt_private_key",
+      "jwt_public_key",
     );
   }
 }

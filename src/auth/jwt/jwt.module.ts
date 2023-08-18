@@ -25,8 +25,10 @@ export const JWTModule = JwtModule.registerAsync({
       global: true,
       signOptions: {
         expiresIn: parameters["jwt_expires_in"] ?? configService.get("jwt_expires_in"),
+        algorithm: "RS512",
       },
-      secret: parameters["jwt_secret"] ?? configService.get("jwt_secret"),
+      privateKey: parameters["jwt_private_key"] ?? configService.get("jwt_private_key").replace(/\\n/g, '\n'),
+      publicKey: parameters["jwt_public_key"] ?? configService.get("jwt_public_key").replace(/\\n/g, '\n'),
     };
   },
-})
+});

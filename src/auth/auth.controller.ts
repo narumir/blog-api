@@ -29,6 +29,9 @@ import {
 import {
   AuthService,
 } from "./auth.service";
+import {
+  Public,
+} from "./auth.guard";
 
 @Controller()
 export class AuthController {
@@ -40,6 +43,7 @@ export class AuthController {
   ) { }
 
   @ApiBody({ type: JoinDTO })
+  @Public()
   @Post("join")
   async join(
     @Req()
@@ -60,6 +64,7 @@ export class AuthController {
   }
 
   @ApiBody({ type: SignInDTO })
+  @Public()
   @Post("signin")
   async signin(
     @Req()
@@ -93,6 +98,7 @@ export class AuthController {
   }
 
   @ApiBody({ type: TokenDTO })
+  @Public()
   @Post("access-token")
   async renewAccessToken(
     @Body()
@@ -115,6 +121,8 @@ export class AuthController {
     }
   }
 
+  @ApiBody({ type: TokenDTO })
+  @Public()
   @Post("refresh-token")
   async renewRefreshToken(
     @Req()

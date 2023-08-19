@@ -2,8 +2,15 @@ import {
   CanActivate,
   ExecutionContext,
   Injectable,
+  Provider,
+  SetMetadata,
   UnauthorizedException,
+  Type
 } from "@nestjs/common";
+import {
+  APP_GUARD,
+  Reflector,
+} from "@nestjs/core";
 import {
   JwtService,
 } from "@nestjs/jwt";
@@ -14,10 +21,19 @@ import type {
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(
-    private jwtService: JwtService,
+    private readonly jwtService: JwtService,
+    private readonly reflector: Reflector,
   ) { }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    const targets: (Function | Type<any>)[] = [
+      context.getHandler(),
+      context.getClass(),
+    ];
+    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, targets);
+    if (isPublic) {
+      return true;
+    }
     const req = context.switchToHttp().getRequest();
     const token = this.extractTokenFromHeader(req);
     if (!token) {
@@ -37,3 +53,10 @@ export class AuthGuard implements CanActivate {
     return type?.toLowerCase() === "bearer" ? token : undefined;
   }
 }
+
+export const IS_PUBLIC_KEY = 'isPublic';
+export const Public = () => SetMetadata(IS_PUBLIC_KEY, true);
+export const AuthProvider: Provider = {
+  provide: APP_GUARD,
+  useClass: AuthGuard,
+};

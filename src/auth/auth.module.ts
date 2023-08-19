@@ -20,6 +20,9 @@ import {
   AuthService,
 } from "./auth.service";
 import {
+  AuthProvider,
+} from "./auth.guard";
+import {
   JWTModule,
 } from "./jwt/jwt.module";
 
@@ -36,6 +39,7 @@ import {
   ],
   providers: [
     AuthService,
+    AuthProvider,
   ],
 })
 export class AuthModule { }

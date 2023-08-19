@@ -30,7 +30,7 @@ const bootstrap = async () => {
   app
     .useGlobalPipes(new ValidationPipe())
     .enableCors({
-      origin: (origin, callback) => {
+      origin: (_, callback) => {
         callback(null, true);
       },
       methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],

@@ -46,4 +46,13 @@ export class UserService {
     user.nickname = nickname;
     return this.userRepository.save(user);
   }
+
+  async changePassword(userId: string, password: string) {
+    const user = await this.findOneByID(userId);
+    const salt = crypto.randomBytes(32);
+    const encryptedPasswrod = await argon.hash(password, { salt, type: argon.argon2id, raw: true });
+    user.salt = salt.toString("hex");
+    user.password = encryptedPasswrod;
+    return this.userRepository.save(user);
+  }
 }

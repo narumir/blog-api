@@ -8,6 +8,9 @@ import {
   User,
 } from "src/entities";
 import {
+  EncryptModule,
+} from "src/encrypt/encrypt.module";
+import {
   UserService,
 } from "./user.service";
 import {
@@ -18,6 +21,7 @@ import {
   imports: [
     TypeOrmModule.forFeature([User], "readonly"),
     TypeOrmModule.forFeature([User], "writable"),
+    EncryptModule,
   ],
   exports: [
     UserService,

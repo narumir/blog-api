@@ -55,7 +55,8 @@ export class AuthController {
     if (exists != null) {
       throw new HttpException("User already exists.", HttpStatus.CONFLICT);
     }
-    const newUser = await this.userService.createUser(body.username, body.password, body.nickname);
+    const password = this.encryptService.decode(body.password);
+    const newUser = await this.userService.createUser(body.username, password, body.nickname);
     const { refreshToken, expiredAt: refreshTokenExpiredAt } = await this.authService.issueRefreshToken(newUser);
     const { accessToken, expiredAt: accessTokenExpiredAt } = await this.authService.issueAccessToken(newUser);
     const { agent, ip } = this.authService.getAgentAndIP(req);

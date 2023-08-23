@@ -35,7 +35,7 @@ export class UserController {
     @Body()
     body: ChangePasswordDTO,
   ) {
-    const userId: string = req["sub"];
+    const userId: string = req["auth"];
     const password = this.encryptService.decode(body.password);
     await this.userService.changePassword(userId, password);
     return { success: true };

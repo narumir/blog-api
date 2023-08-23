@@ -15,8 +15,8 @@ import {
   JwtService,
 } from "@nestjs/jwt";
 import type {
-  Request,
-} from "express";
+  FastifyRequest,
+} from "fastify";
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -48,7 +48,7 @@ export class AuthGuard implements CanActivate {
     return true;
   }
 
-  private extractTokenFromHeader(req: Request) {
+  private extractTokenFromHeader(req: FastifyRequest) {
     const [type, token] = req.headers.authorization?.split(" ") ?? [];
     return type?.toLowerCase() === "bearer" ? token : undefined;
   }

@@ -9,6 +9,7 @@ import {
 import {
   AuthToken,
   User,
+  Post,
 } from "src/entities";
 import {
   SSMModule,
@@ -24,6 +25,7 @@ const defaultOptions: TypeOrmModuleOptions = {
   entities: [
     User,
     AuthToken,
+    Post,
   ],
 };
 

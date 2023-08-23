@@ -22,6 +22,9 @@ import {
 import {
   EncryptModule,
 } from './encrypt/encrypt.module';
+import {
+  PostModule,
+} from './post/post.module';
 
 const Routes = RouterModule.register([
   {
@@ -36,6 +39,10 @@ const Routes = RouterModule.register([
     path: "encrypt",
     module: EncryptModule,
   },
+  {
+    path: "post",
+    module: PostModule,
+  },
 ]);
 
 @Module({
@@ -49,6 +56,7 @@ const Routes = RouterModule.register([
     UserModule,
     AuthModule,
     EncryptModule,
+    PostModule,
   ],
 })
 export class AppModule { }

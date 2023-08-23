@@ -8,6 +8,7 @@ import {
 } from "./base-entity";
 import {
   AuthToken,
+  Post,
 } from "src/entities";
 
 @Entity({
@@ -49,4 +50,7 @@ export class User extends BaseEntity {
 
   @OneToMany(() => AuthToken, (token) => token.user, { onDelete: "CASCADE" })
   tokens: AuthToken[];
+
+  @OneToMany(() => Post, (post) => post.user, { onDelete: "CASCADE" })
+  posts: Post[];
 }

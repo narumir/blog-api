@@ -32,7 +32,7 @@ export class AuthService {
   ) { }
 
   findOneByToken(token: string) {
-    return this.readonlyTokenRepository.findOne({ where: { token } });
+    return this.readonlyTokenRepository.findOneBy({ token });
   }
 
   saveRefreshToken(user: User, token: string, expiredAt: Date, agent: string, ip: string) {
@@ -77,9 +77,8 @@ export class AuthService {
     };
   }
 
-  async discardRefreshToken(token: string) {
-    const auth = await this.readonlyTokenRepository.findOneBy({ token });
-    await this.tokenRepository.remove(auth);
+  discardRefreshToken(token: string) {
+    return this.tokenRepository.delete({ token });
   }
 
   getAgentAndIP(req: FastifyRequest) {

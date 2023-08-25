@@ -20,6 +20,12 @@ import {
 import {
   AppModule,
 } from './app.module';
+import {
+  ValidationHTTPException,
+} from './validation-exception';
+import {
+  ResponseIntercepter,
+} from './response-intercepter';
 
 const bootstrap = async () => {
   const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter());
@@ -28,7 +34,14 @@ const bootstrap = async () => {
   const configService = app.get(ConfigService);
   const port = configService.get<number>("port");
   app
-    .useGlobalPipes(new ValidationPipe())
+    .useGlobalPipes(new ValidationPipe({
+      exceptionFactory(errors) {
+        const error = errors[0];
+        const constraint = Object.values(error.constraints)[0];
+        throw new ValidationHTTPException(constraint, error.property);
+      },
+    }))
+    .useGlobalInterceptors(new ResponseIntercepter())
     .enableCors({
       origin: (_, callback) => {
         callback(null, true);

@@ -25,6 +25,12 @@ import {
 import {
   PostModule,
 } from './post/post.module';
+import {
+  ValidationExceptionFilterProvider,
+} from './validation-exception-filter';
+import {
+  HttpExceptionFilterProvider,
+} from './exception-filter';
 
 const Routes = RouterModule.register([
   {
@@ -57,6 +63,10 @@ const Routes = RouterModule.register([
     AuthModule,
     EncryptModule,
     PostModule,
+  ],
+  providers: [
+    ValidationExceptionFilterProvider,
+    HttpExceptionFilterProvider,
   ],
 })
 export class AppModule { }

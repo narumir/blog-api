@@ -4,8 +4,9 @@ import {
   Injectable,
   Provider,
   SetMetadata,
-  UnauthorizedException,
-  Type
+  Type,
+  HttpException,
+  HttpStatus
 } from "@nestjs/common";
 import {
   APP_GUARD,
@@ -17,6 +18,9 @@ import {
 import type {
   FastifyRequest,
 } from "fastify";
+import {
+  ErrorCodes,
+} from "src/error-code";
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -37,13 +41,13 @@ export class AuthGuard implements CanActivate {
     const req = context.switchToHttp().getRequest();
     const token = this.extractTokenFromHeader(req);
     if (!token) {
-      throw new UnauthorizedException();
+      throw new HttpException(ErrorCodes.AUTHENTICATION_FAILED, HttpStatus.UNAUTHORIZED);
     }
     try {
       const decode = await this.jwtService.verifyAsync(token);
       req["auth"] = decode["sub"];
     } catch (e) {
-      throw new UnauthorizedException();
+      throw new HttpException(ErrorCodes.AUTHENTICATION_FAILED, HttpStatus.UNAUTHORIZED);
     }
     return true;
   }

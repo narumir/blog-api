@@ -32,6 +32,9 @@ import {
 import {
   Public,
 } from "./auth.guard";
+import {
+  ErrorCodes,
+} from "src/error-code";
 
 @Controller()
 export class AuthController {
@@ -53,7 +56,7 @@ export class AuthController {
   ) {
     const exists = await this.userService.findOneByUsername(body.username);
     if (exists != null) {
-      throw new HttpException("User already exists.", HttpStatus.CONFLICT);
+      throw new HttpException(ErrorCodes.ALREADY_EXIST, HttpStatus.CONFLICT);
     }
     const password = this.encryptService.decode(body.password);
     const newUser = await this.userService.createUser(body.username, password, body.nickname);
@@ -75,11 +78,11 @@ export class AuthController {
   ) {
     const user = await this.userService.findOneByUsername(body.username);
     if (user == null) {
-      throw new HttpException("fail to signin.", HttpStatus.UNAUTHORIZED);
+      throw new HttpException(ErrorCodes.AUTHENTICATION_FAILED, HttpStatus.UNAUTHORIZED);
     }
     const password = this.encryptService.decode(body.password);
     if (await this.userService.verifyPassword(user, password) == false) {
-      throw new HttpException("fail to signin.", HttpStatus.UNAUTHORIZED);
+      throw new HttpException(ErrorCodes.AUTHENTICATION_FAILED, HttpStatus.UNAUTHORIZED);
     }
     const { refreshToken, expiredAt: refreshTokenExpiredAt } = await this.authService.issueRefreshToken(user);
     const { accessToken, expiredAt: accessTokenExpiredAt } = await this.authService.issueAccessToken(user);
@@ -105,21 +108,17 @@ export class AuthController {
     @Body()
     body: TokenDTO,
   ) {
-    try {
-      const decode = await this.jwtService.verifyAsync(body.token);
-      const exists = await this.authService.findOneByToken(body.token);
-      if (exists == null) {
-        throw new Error("token not exists.");
-      }
-      const user = await this.userService.findOneByID(decode["sub"]);
-      if (user == null) {
-        throw new Error("user not exists.");
-      }
-      const { accessToken, expiredAt: accessTokenExpiredAt } = await this.authService.issueAccessToken(user);
-      return { accessToken, accessTokenExpiredAt };
-    } catch (e) {
-      throw new HttpException("fail to renew access token.", HttpStatus.UNAUTHORIZED);
+    const decode = await this.jwtService.verifyAsync(body.token);
+    const exists = await this.authService.findOneByToken(body.token);
+    if (exists == null) {
+      throw new HttpException(ErrorCodes.NOT_EXIST, HttpStatus.UNAUTHORIZED);
     }
+    const user = await this.userService.findOneByID(decode["sub"]);
+    if (user == null) {
+      throw new HttpException(ErrorCodes.NOT_EXIST, HttpStatus.UNAUTHORIZED);
+    }
+    const { accessToken, expiredAt: accessTokenExpiredAt } = await this.authService.issueAccessToken(user);
+    return { accessToken, accessTokenExpiredAt };
   }
 
   @ApiBody({ type: TokenDTO })
@@ -131,23 +130,19 @@ export class AuthController {
     @Body()
     body: TokenDTO,
   ) {
-    try {
-      const decode = await this.jwtService.verifyAsync(body.token);
-      const exists = await this.authService.findOneByToken(body.token);
-      if (exists == null) {
-        throw new Error("token not exists.");
-      }
-      const user = await this.userService.findOneByID(decode["sub"]);
-      if (user == null) {
-        throw new Error("user not exists.");
-      }
-      const { refreshToken, expiredAt: refreshTokenExpiredAt } = await this.authService.issueRefreshToken(user);
-      const { agent, ip } = this.authService.getAgentAndIP(req);
-      await this.authService.saveRefreshToken(user, refreshToken, refreshTokenExpiredAt, agent, ip);
-      await this.authService.discardRefreshToken(body.token);
-      return { refreshToken, refreshTokenExpiredAt };
-    } catch (e) {
-      throw new HttpException("fail to renew refresh token.", HttpStatus.UNAUTHORIZED);
+    const decode = await this.jwtService.verifyAsync(body.token);
+    const exists = await this.authService.findOneByToken(body.token);
+    if (exists == null) {
+      throw new HttpException(ErrorCodes.NOT_EXIST, HttpStatus.UNAUTHORIZED);
     }
+    const user = await this.userService.findOneByID(decode["sub"]);
+    if (user == null) {
+      throw new HttpException(ErrorCodes.NOT_EXIST, HttpStatus.UNAUTHORIZED);
+    }
+    const { refreshToken, expiredAt: refreshTokenExpiredAt } = await this.authService.issueRefreshToken(user);
+    const { agent, ip } = this.authService.getAgentAndIP(req);
+    await this.authService.saveRefreshToken(user, refreshToken, refreshTokenExpiredAt, agent, ip);
+    await this.authService.discardRefreshToken(body.token);
+    return { refreshToken, refreshTokenExpiredAt };
   }
 }

@@ -5,6 +5,7 @@ import {
   InjectRepository,
 } from "@nestjs/typeorm";
 import {
+  MoreThan,
   Repository,
 } from "typeorm";
 import {
@@ -27,5 +28,44 @@ export class PostService {
     } catch (e) {
       return false;
     }
+  }
+
+  async pagenate(page: number = 1, take: number = 12) {
+    const [posts, total] = await this.readonlyPostRepository.findAndCount({
+      take,
+      skip: (page - 1) * take,
+      relations: ["user"],
+    });
+    return { posts, total, lastPage: Math.ceil(total / take) };
+  }
+
+  cursor(cursor?: string, take: number = 12) {
+    return this.readonlyPostRepository.find({
+      where: {
+        ...(cursor != null && { id: MoreThan(cursor) }),
+      },
+      take,
+      order: {
+        id: "DESC",
+      },
+    });
+  }
+
+  getPost(id: string) {
+    return this.readonlyPostRepository.findOne({
+      where: {
+        id,
+      },
+      relations: ["user"],
+    });
+  }
+
+  removeByUser(id: string, userId: string) {
+    return this.postRepository.delete({
+      id,
+      user: {
+        id: userId,
+      },
+    });
   }
 }

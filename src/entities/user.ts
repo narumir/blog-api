@@ -22,6 +22,7 @@ export class User extends BaseEntity {
     type: "varchar",
     length: 320,
     unique: true,
+    select: false,
   })
   username: string;
 
@@ -29,6 +30,7 @@ export class User extends BaseEntity {
     name: "password",
     nullable: false,
     type: "bytea",
+    select: false,
   })
   password: Buffer;
 
@@ -37,6 +39,7 @@ export class User extends BaseEntity {
     nullable: false,
     type: "char",
     length: 64,
+    select: false,
   })
   salt: string;
 

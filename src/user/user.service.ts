@@ -22,8 +22,12 @@ export class UserService {
     private readonly userRepository: Repository<User>,
   ) { }
 
+  /** auth */
   findOneByUsername(username: string) {
-    return this.readonlyUserRepository.findOneBy({ username });
+    return this.readonlyUserRepository.createQueryBuilder("user")
+      .where("user.username = :username", { username })
+      .addSelect(["user.username", "user.password", "user.salt"])
+      .getOne();
   }
 
   findOneByID(id: string) {

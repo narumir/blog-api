@@ -44,7 +44,8 @@ export class PostController {
     body: CreatePostDTO,
   ) {
     const userId: string = req["auth"];
-    const result = await this.postService.createPost(userId, body.title, body.content);
+    const preview = this.postService.createPostpreview(body.content);
+    const result = await this.postService.createPost(userId, body.title, body.content, preview);
     return { success: result };
   }
 

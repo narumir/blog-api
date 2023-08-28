@@ -21,9 +21,9 @@ export class PostService {
     private readonly postRepository: Repository<Post>,
   ) { }
 
-  async createPost(userId: string, title: string, content: any) {
+  async createPost(userId: string, title: string, content: any, preview: string) {
     try {
-      await this.postRepository.insert({ title, content, user: { id: userId } });
+      await this.postRepository.insert({ title, content, preview, user: { id: userId } });
       return true;
     } catch (e) {
       return false;
@@ -48,6 +48,7 @@ export class PostService {
       order: {
         id: "DESC",
       },
+      relations: ["user"]
     });
   }
 
@@ -67,5 +68,14 @@ export class PostService {
         id: userId,
       },
     });
+  }
+
+  createPostpreview(content: any): string {
+    const idx = content?.blocks.findIndex((val: any) => val?.type === "paragraph");
+    if (idx === -1) {
+      return "";
+    }
+    const preview: string = content?.blocks[idx]?.data?.text?.replace(/<(.|\n)*?>/g, "") ?? "";
+    return preview.substring(0, 100);
   }
 }

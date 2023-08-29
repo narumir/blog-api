@@ -31,6 +31,9 @@ import {
 import {
   HttpExceptionFilterProvider,
 } from './exception-filter';
+import {
+  HealthModule,
+} from './health/health.module';
 
 const Routes = RouterModule.register([
   {
@@ -49,6 +52,10 @@ const Routes = RouterModule.register([
     path: "post",
     module: PostModule,
   },
+  {
+    path: "health",
+    module: HealthModule,
+  },
 ]);
 
 @Module({
@@ -63,6 +70,7 @@ const Routes = RouterModule.register([
     AuthModule,
     EncryptModule,
     PostModule,
+    HealthModule,
   ],
   providers: [
     ValidationExceptionFilterProvider,

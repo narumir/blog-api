@@ -3,10 +3,6 @@ import {
   Provider,
 } from "@nestjs/common";
 import {
-  SSMModule,
-  SSMService,
-} from "src/config";
-import {
   EncryptController,
 } from "./encrypt.controller";
 import {
@@ -21,13 +17,11 @@ const KeyProvider: Provider = {
   provide: "KEY_PROVIDER",
   inject: [
     ConfigService,
-    SSMService,
   ],
-  useFactory: async (configService: ConfigService, ssmService: SSMService) => {
-    const parameters = await ssmService.getEncryptParameters();
+  useFactory: async (configService: ConfigService) => {
     return {
-      publicKey: (parameters["rsa_public_key"] ?? configService.get("rsa_public_key")).replace(/\\n/g, '\n'),
-      privateKey: (parameters["rsa_private_key"] ?? configService.get("rsa_private_key")).replace(/\\n/g, '\n'),
+      publicKey: configService.get("rsa_public_key").replace(/\\n/g, '\n'),
+      privateKey: configService.get("rsa_private_key").replace(/\\n/g, '\n'),
     };
   },
 }
@@ -35,7 +29,6 @@ const KeyProvider: Provider = {
 @Module({
   imports: [
     ConfigModule,
-    SSMModule,
   ],
   exports: [
     EncryptService,

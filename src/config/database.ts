@@ -11,12 +11,6 @@ import {
   User,
   Post,
 } from "src/entities";
-import {
-  SSMModule,
-} from "./ssm.module";
-import {
-  SSMService,
-} from "./ssm.service";
 
 const defaultOptions: TypeOrmModuleOptions = {
   type: "postgres",
@@ -33,20 +27,17 @@ export const ReadonlyDatabase = TypeOrmModule.forRootAsync({
   name: "readonly",
   imports: [
     ConfigModule,
-    SSMModule,
   ],
   inject: [
     ConfigService,
-    SSMService,
   ],
-  useFactory: async (configService: ConfigService, ssmService: SSMService): Promise<TypeOrmModuleOptions> => {
-    const parameters = await ssmService.getReadonlyDatabaseParameters();
+  useFactory: async (configService: ConfigService): Promise<TypeOrmModuleOptions> => {
     return {
       name: "readonly",
-      host: parameters["db_readonly_host"] ?? configService.get("db_readonly_host"),
-      port: parseInt(parameters["db_readonly_port"] ?? configService.get("db_readonly_port"), 10),
-      username: parameters["db_readonly_username"] ?? configService.get("db_readonly_username"),
-      password: parameters["db_readonly_password"] ?? configService.get("db_readonly_password"),
+      host: configService.get("db_readonly_host"),
+      port: parseInt(configService.get("db_readonly_port"), 10),
+      username: configService.get("db_readonly_username"),
+      password: configService.get("db_readonly_password"),
       synchronize: false,
       ...defaultOptions,
     };
@@ -57,20 +48,17 @@ export const WritableDatabase = TypeOrmModule.forRootAsync({
   name: "writable",
   imports: [
     ConfigModule,
-    SSMModule,
   ],
   inject: [
     ConfigService,
-    SSMService,
   ],
-  useFactory: async (configService: ConfigService, ssmService: SSMService): Promise<TypeOrmModuleOptions> => {
-    const parameters = await ssmService.getWritableDatabaseParameters();
+  useFactory: async (configService: ConfigService): Promise<TypeOrmModuleOptions> => {
     return {
       name: "writable",
-      host: parameters["db_writable_host"] ?? configService.get("db_writable_host"),
-      port: parseInt(parameters["db_writable_port"] ?? configService.get("db_writable_port"), 10),
-      username: parameters["db_writable_username"] ?? configService.get("db_writable_username"),
-      password: parameters["db_writable_password"] ?? configService.get("db_writable_password"),
+      host: configService.get("db_writable_host"),
+      port: parseInt(configService.get("db_writable_port"), 10),
+      username: configService.get("db_writable_username"),
+      password: configService.get("db_writable_password"),
       synchronize: process.env.NODE_ENV !== "production",
       ...defaultOptions,
     };

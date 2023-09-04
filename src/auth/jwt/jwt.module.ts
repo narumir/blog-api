@@ -5,30 +5,23 @@ import {
 import {
   JwtModule,
 } from "@nestjs/jwt";
-import {
-  SSMModule,
-  SSMService,
-} from "src/config";
 
 export const JWTModule = JwtModule.registerAsync({
   imports: [
     ConfigModule,
-    SSMModule,
   ],
   inject: [
     ConfigService,
-    SSMService,
   ],
-  useFactory: async (configService: ConfigService, ssmService: SSMService) => {
-    const parameters = await ssmService.getAuthParameters();
+  useFactory: async (configService: ConfigService) => {
     return {
       global: true,
       signOptions: {
-        expiresIn: parameters["jwt_expires_in"] ?? configService.get("jwt_expires_in"),
+        expiresIn: configService.get("jwt_expires_in"),
         algorithm: "RS512",
       },
-      privateKey: parameters["jwt_private_key"] ?? configService.get("jwt_private_key").replace(/\\n/g, '\n'),
-      publicKey: parameters["jwt_public_key"] ?? configService.get("jwt_public_key").replace(/\\n/g, '\n'),
+      privateKey: configService.get("jwt_private_key").replace(/\\n/g, '\n'),
+      publicKey: configService.get("jwt_public_key").replace(/\\n/g, '\n'),
     };
   },
 });

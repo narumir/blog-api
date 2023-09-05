@@ -7,7 +7,6 @@ import {
 import {
   EnvConfig,
   ReadonlyDatabase,
-  SSMModule,
   WritableDatabase,
 } from './config';
 import {
@@ -61,7 +60,6 @@ const Routes = RouterModule.register([
 @Module({
   imports: [
     EnvConfig,
-    SSMModule,
     ReadonlyDatabase,
     WritableDatabase,
     Routes,

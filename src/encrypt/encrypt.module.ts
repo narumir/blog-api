@@ -13,7 +13,7 @@ import {
   ConfigService,
 } from "@nestjs/config";
 
-const KeyProvider: Provider = {
+export const KeyProvider: Provider = {
   provide: "KEY_PROVIDER",
   inject: [
     ConfigService,

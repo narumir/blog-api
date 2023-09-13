@@ -38,6 +38,14 @@ export class Post extends BaseEntity {
   })
   preview: string;
 
+  @Column({
+    type: "varchar",
+    name: "thumbnail",
+    nullable: true,
+    length: 255,
+  })
+  thumbnail?: string;
+
   @ManyToOne(() => User, (user) => user.posts, { nullable: false })
   @JoinColumn({ name: "user_id" })
   user: User;

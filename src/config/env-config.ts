@@ -19,6 +19,9 @@ const config: ConfigFactory = () => ({
   db_readonly_port: process.env.DB_READONLY_PORT,
   db_readonly_username: process.env.DB_READONLY_USERNAME,
   db_readonly_password: process.env.DB_READONLY_PASSWORD,
+  aws_content_bucket: process.env.AWS_CONTENT_BUCKET,
+  aws_content_access_key: process.env.AWS_CONTENT_ACCESS_KEY,
+  aws_content_secret_key: process.env.AWS_CONTENT_SECRET_KEY,
 });
 
 export const EnvConfig = ConfigModule.forRoot({

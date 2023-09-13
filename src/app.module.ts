@@ -36,24 +36,29 @@ import {
 
 const Routes = RouterModule.register([
   {
-    path: "user",
-    module: UserModule,
-  },
-  {
-    path: "auth",
-    module: AuthModule,
-  },
-  {
-    path: "encrypt",
-    module: EncryptModule,
-  },
-  {
-    path: "post",
-    module: PostModule,
-  },
-  {
-    path: "health",
-    module: HealthModule,
+    path: "v1",
+    children: [
+      {
+        path: "users",
+        module: UserModule,
+      },
+      {
+        path: "auth",
+        module: AuthModule,
+      },
+      {
+        path: "encrypt",
+        module: EncryptModule,
+      },
+      {
+        path: "posts",
+        module: PostModule,
+      },
+      {
+        path: "health",
+        module: HealthModule,
+      },
+    ],
   },
 ]);
 

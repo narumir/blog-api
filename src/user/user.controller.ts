@@ -29,12 +29,7 @@ export class UserController {
 
   @ApiBody({ type: ChangePasswordDTO })
   @Post("change-password")
-  async changePassword(
-    @Req()
-    req: FastifyRequest,
-    @Body()
-    body: ChangePasswordDTO,
-  ) {
+  async changePassword(@Req() req: FastifyRequest, @Body() body: ChangePasswordDTO) {
     const userId: string = req["auth"];
     const password = this.encryptService.decode(body.password);
     await this.userService.changePassword(userId, password);

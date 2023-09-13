@@ -46,7 +46,7 @@ export class PostService {
       },
       take,
       order: {
-        id: "DESC",
+        createdAt: "DESC",
       },
       relations: ["user"]
     });

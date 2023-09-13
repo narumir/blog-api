@@ -5,6 +5,7 @@ import {
   HttpException,
   HttpStatus,
   Param,
+  ParseUUIDPipe,
   Post,
   Query,
   Req,
@@ -37,12 +38,7 @@ export class PostController {
 
   @ApiBody({ type: CreatePostDTO })
   @Post()
-  async createPost(
-    @Req()
-    req: FastifyRequest,
-    @Body()
-    body: CreatePostDTO,
-  ) {
+  async createPost(@Req() req: FastifyRequest, @Body() body: CreatePostDTO) {
     const userId: string = req["auth"];
     const preview = this.postService.createPostpreview(body.content);
     const result = await this.postService.createPost(userId, body.title, body.content, preview);
@@ -51,20 +47,14 @@ export class PostController {
 
   @Public()
   @Get()
-  async getPostsPagenation(
-    @Query("cursor")
-    cursor?: string,
-  ) {
+  async getPostsPagenation(@Query("cursor", new ParseUUIDPipe({ version: "4", errorHttpStatusCode: HttpStatus.NOT_ACCEPTABLE })) cursor?: string) {
     const posts = await this.postService.cursor(cursor);
     return posts;
   }
 
   @Public()
   @Get(":id")
-  async getPost(
-    @Param("id")
-    id: string,
-  ) {
+  async getPost(@Param("id", new ParseUUIDPipe({ version: "4", errorHttpStatusCode: HttpStatus.NOT_ACCEPTABLE })) id: string) {
     const post = await this.postService.getPost(id);
     if (post == null) {
       throw new HttpException(ErrorCodes.NOT_FOUND_ERROR, HttpStatus.NOT_FOUND);

@@ -48,12 +48,7 @@ export class AuthController {
   @ApiBody({ type: JoinDTO })
   @Public()
   @Post("join")
-  async join(
-    @Req()
-    req: FastifyRequest,
-    @Body()
-    body: JoinDTO,
-  ) {
+  async join(@Req() req: FastifyRequest, @Body() body: JoinDTO) {
     const exists = await this.userService.findOneByUsername(body.username);
     if (exists != null) {
       throw new HttpException(ErrorCodes.ALREADY_EXIST, HttpStatus.CONFLICT);
@@ -70,12 +65,7 @@ export class AuthController {
   @ApiBody({ type: SignInDTO })
   @Public()
   @Post("signin")
-  async signin(
-    @Req()
-    req: FastifyRequest,
-    @Body()
-    body: SignInDTO,
-  ) {
+  async signin(@Req() req: FastifyRequest, @Body() body: SignInDTO) {
     const user = await this.userService.findOneByUsername(body.username);
     if (user == null) {
       throw new HttpException(ErrorCodes.AUTHENTICATION_FAILED, HttpStatus.UNAUTHORIZED);
@@ -93,10 +83,7 @@ export class AuthController {
 
   @ApiBody({ type: TokenDTO })
   @Post("signout")
-  async signout(
-    @Body()
-    body: TokenDTO,
-  ) {
+  async signout(@Body() body: TokenDTO) {
     await this.authService.discardRefreshToken(body.token);
     return { success: true };
   }
@@ -104,10 +91,7 @@ export class AuthController {
   @ApiBody({ type: TokenDTO })
   @Public()
   @Post("access-token")
-  async renewAccessToken(
-    @Body()
-    body: TokenDTO,
-  ) {
+  async renewAccessToken(@Body() body: TokenDTO) {
     const decode = await this.jwtService.verifyAsync(body.token);
     const exists = await this.authService.findOneByToken(body.token);
     if (exists == null) {
@@ -124,12 +108,7 @@ export class AuthController {
   @ApiBody({ type: TokenDTO })
   @Public()
   @Post("refresh-token")
-  async renewRefreshToken(
-    @Req()
-    req: FastifyRequest,
-    @Body()
-    body: TokenDTO,
-  ) {
+  async renewRefreshToken(@Req() req: FastifyRequest, @Body() body: TokenDTO) {
     const decode = await this.jwtService.verifyAsync(body.token);
     const exists = await this.authService.findOneByToken(body.token);
     if (exists == null) {

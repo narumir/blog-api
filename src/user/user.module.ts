@@ -8,23 +8,16 @@ import {
   User,
 } from "src/entities";
 import {
-  EncryptModule,
-} from "src/encrypt/encrypt.module";
+  UserController,
+} from "./user.controller";
 import {
   UserService,
 } from "./user.service";
-import {
-  UserController,
-} from "./user.controller";
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([User], "readonly"),
     TypeOrmModule.forFeature([User], "writable"),
-    EncryptModule,
-  ],
-  exports: [
-    UserService,
   ],
   controllers: [
     UserController,

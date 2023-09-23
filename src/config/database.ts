@@ -7,23 +7,19 @@ import {
   TypeOrmModuleOptions,
 } from "@nestjs/typeorm";
 import {
-  AuthToken,
   User,
-  Post,
 } from "src/entities";
 
-const defaultOptions: TypeOrmModuleOptions = {
+const databaseDefaultOptions: TypeOrmModuleOptions = {
   type: "postgres",
   database: "blog",
   schema: "public",
   entities: [
     User,
-    AuthToken,
-    Post,
   ],
 };
 
-export const ReadonlyDatabase = TypeOrmModule.forRootAsync({
+export const ReadonlyDataSource = TypeOrmModule.forRootAsync({
   name: "readonly",
   imports: [
     ConfigModule,
@@ -31,20 +27,20 @@ export const ReadonlyDatabase = TypeOrmModule.forRootAsync({
   inject: [
     ConfigService,
   ],
-  useFactory: async (configService: ConfigService): Promise<TypeOrmModuleOptions> => {
+  useFactory: async (configService: ConfigService) => {
     return {
       name: "readonly",
-      host: configService.get("db_readonly_host"),
-      port: parseInt(configService.get("db_readonly_port"), 10),
-      username: configService.get("db_readonly_username"),
-      password: configService.get("db_readonly_password"),
+      host: configService.get("db.readonly.host"),
+      port: configService.get<number>("db.readonly.port"),
+      username: configService.get("db.readonly.username"),
+      password: configService.get("db.readonly.password"),
       synchronize: false,
-      ...defaultOptions,
+      ...databaseDefaultOptions,
     };
   },
 });
 
-export const WritableDatabase = TypeOrmModule.forRootAsync({
+export const WritableDataSource = TypeOrmModule.forRootAsync({
   name: "writable",
   imports: [
     ConfigModule,
@@ -52,15 +48,16 @@ export const WritableDatabase = TypeOrmModule.forRootAsync({
   inject: [
     ConfigService,
   ],
-  useFactory: async (configService: ConfigService): Promise<TypeOrmModuleOptions> => {
+
+  useFactory: async (configService: ConfigService) => {
     return {
       name: "writable",
-      host: configService.get("db_writable_host"),
-      port: parseInt(configService.get("db_writable_port"), 10),
-      username: configService.get("db_writable_username"),
-      password: configService.get("db_writable_password"),
+      host: configService.get("db.writable.host"),
+      port: configService.get<number>("db.writable.port"),
+      username: configService.get("db.writable.username"),
+      password: configService.get("db.writable.password"),
       synchronize: process.env.NODE_ENV !== "production",
-      ...defaultOptions,
+      ...databaseDefaultOptions,
     };
   },
 });

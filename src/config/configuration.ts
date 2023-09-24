@@ -18,6 +18,10 @@ const configuration = () => ({
       password: process.env.DB_WRITABLE_PASSWORD,
     },
   },
+  encrypt: {
+    publicKey: process.env.RSA_PUBLIC_KEY,
+    privateKey: process.env.RSA_PRIVATE_KEY,
+  },
 });
 
 export default ConfigModule.forRoot({

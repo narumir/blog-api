@@ -18,6 +18,9 @@ import {
 import {
   AppExceptionFilter,
 } from "./app.exception-filter";
+import {
+  EncryptModule,
+} from "./encrypt/encrypt.module";
 
 const Routes = RouterModule.register([
   {
@@ -31,6 +34,10 @@ const Routes = RouterModule.register([
         path: "users",
         module: UserModule,
       },
+      {
+        path: "encrypt",
+        module: EncryptModule,
+      }
     ],
   },
 ]);
@@ -43,6 +50,7 @@ const Routes = RouterModule.register([
     Routes,
     AuthModule,
     UserModule,
+    EncryptModule,
   ],
   providers: [
     AppExceptionFilter,

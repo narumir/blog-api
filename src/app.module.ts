@@ -21,6 +21,9 @@ import {
 import {
   EncryptModule,
 } from "./encrypt/encrypt.module";
+import {
+  JWTFactory,
+} from "./jwt/jwt.module";
 
 const Routes = RouterModule.register([
   {
@@ -48,6 +51,7 @@ const Routes = RouterModule.register([
     ReadonlyDataSource,
     WritableDataSource,
     Routes,
+    JWTFactory,
     AuthModule,
     UserModule,
     EncryptModule,

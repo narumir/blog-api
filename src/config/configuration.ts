@@ -22,6 +22,11 @@ const configuration = () => ({
     publicKey: process.env.RSA_PUBLIC_KEY,
     privateKey: process.env.RSA_PRIVATE_KEY,
   },
+  jwt: {
+    expires_in: "1h",
+    privatekey: process.env.JWT_PRIVATE_KEY,
+    publickey: process.env.JWT_PUBLIC_KEY,
+  },
 });
 
 export default ConfigModule.forRoot({

@@ -7,6 +7,7 @@ import {
   TypeOrmModuleOptions,
 } from "@nestjs/typeorm";
 import {
+  AuthToken,
   User,
 } from "src/entities";
 
@@ -15,6 +16,7 @@ const databaseDefaultOptions: TypeOrmModuleOptions = {
   database: "blog",
   schema: "public",
   entities: [
+    AuthToken,
     User,
   ],
 };

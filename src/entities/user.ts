@@ -1,10 +1,14 @@
 import {
   Column,
   Entity,
+  OneToMany,
 } from "typeorm";
 import {
   CommonEntity,
 } from "./common-entity";
+import {
+  AuthToken,
+} from "./auth-token";
 
 @Entity({
   name: "user",
@@ -59,4 +63,7 @@ export class User extends CommonEntity {
     select: false,
   })
   salt: Buffer;
+
+  @OneToMany(() => AuthToken, (token) => token.user, { onDelete: "CASCADE" })
+  tokens: AuthToken[];
 }

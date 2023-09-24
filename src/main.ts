@@ -19,6 +19,15 @@ import {
 
 const bootstrap = async () => {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  app.enableCors({
+    origin: (_, callback) => {
+      callback(null, true);
+    },
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    credentials: true,
+    optionsSuccessStatus: 204,
+    preflightContinue: false,
+  });
   app
     .useGlobalPipes(new ValidationPipe())
     .useGlobalInterceptors(new ResponseIntercepter());

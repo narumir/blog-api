@@ -20,6 +20,9 @@ import {
   AuthToken,
   User,
 } from "src/entities";
+import {
+  unabledWords,
+} from "./auth.reserved";
 
 @Injectable()
 export class AuthService {
@@ -68,6 +71,15 @@ export class AuthService {
     authToken.expiredAt = expiredAt;
     authToken.user = user;
     return this.authRepository.save(authToken);
+  }
+
+  public checkReservedWord(text: string) {
+    for (let i = 0; i < unabledWords.length; i++) {
+      if (text.includes(unabledWords[i])) {
+        return true;
+      }
+    }
+    return false;
   }
 
   public discardRefreshToken(token: string) {

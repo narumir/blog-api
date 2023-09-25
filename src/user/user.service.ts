@@ -32,4 +32,17 @@ export class UserService {
     user.salt = salt;
     return this.userRepository.save(user);
   }
+
+  public async verifyPassword(user: User, password) {
+    const encryptedPasswrod = await argon.hash(password, { salt: user.salt, type: argon.argon2id, raw: true });
+    return user.password.equals(encryptedPasswrod);
+  }
+
+  public findOneByEmail(email: string) {
+    return this.readonlyUserRepository.findOneBy({ email });
+  }
+
+  public findOneByNickname(nickname: string) {
+    return this.readonlyUserRepository.findOneBy({ nickname });
+  }
 }

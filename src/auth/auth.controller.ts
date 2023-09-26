@@ -33,16 +33,13 @@ import {
 import {
   Auth,
 } from "./auth.decorator";
-import {
-  AuthToken,
-} from "src/entities";
-
 @Controller()
 export class AuthController {
   constructor(
     private readonly encryptService: EncryptService,
     private readonly userService: UserService,
     private readonly authService: AuthService,
+    private readonly jwtService: JwtService,
   ) { }
 
   @Post("signup")
@@ -88,14 +85,14 @@ export class AuthController {
     this.authService.discardRefreshToken(userid, body.token);
   }
 
-  @UseGuards(AuthGuard)
   @Post("access-token")
-  public async renewAccessToken(@Auth() userid: string, @Body() body: TokenDTO) {
+  public async renewAccessToken(@Body() body: TokenDTO) {
+    const decode = await this.jwtService.verifyAsync(body.token);
     const exists = await this.authService.findOneByToken(body.token);
     if (exists == null) {
       throw new HttpException("Token is invalid", HttpStatus.UNAUTHORIZED);
     }
-    const user = await this.userService.findOneByID(userid);
+    const user = await this.userService.findOneByID(decode["sub"]);
     if (user == null) {
       throw new HttpException("Token is invalid", HttpStatus.UNAUTHORIZED);
     }
@@ -103,21 +100,21 @@ export class AuthController {
     return { accessToken, accessTokenExpiredAt };
   }
 
-  @UseGuards(AuthToken)
   @Post("renew-token")
-  public async renewRefreshToken(@Auth() userid: string, @Req() req: Request, @Body() body: TokenDTO) {
+  public async renewRefreshToken(@Req() req: Request, @Body() body: TokenDTO) {
+    const decode = await this.jwtService.verifyAsync(body.token);
     const exists = await this.authService.findOneByToken(body.token);
     if (exists == null) {
       throw new HttpException("Token is invalid", HttpStatus.UNAUTHORIZED);
     }
-    const user = await this.userService.findOneByID(userid);
+    const user = await this.userService.findOneByID(decode["sub"]);
     if (user == null) {
       throw new HttpException("Token is invalid", HttpStatus.UNAUTHORIZED);
     }
     const { token: refreshToken, expiredAt: refreshTokenExpiredAt } = await this.authService.issueRefreshToken(user);
     const { agent, ip } = this.authService.getAgentAndIP(req);
     await this.authService.saveRefreshToken(user, refreshToken, refreshTokenExpiredAt, agent, ip);
-    await this.authService.discardRefreshToken(userid, body.token);
+    await this.authService.discardRefreshToken(decode["sub"], body.token);
     return { refreshToken, refreshTokenExpiredAt };
   }
 }

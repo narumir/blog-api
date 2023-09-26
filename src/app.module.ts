@@ -1,6 +1,8 @@
 import Configuration from "src/config/configuration";
 import {
+  MiddlewareConsumer,
   Module,
+  NestModule,
 } from '@nestjs/common';
 import {
   RouterModule,
@@ -24,6 +26,9 @@ import {
 import {
   JWTFactory,
 } from "./jwt/jwt.module";
+import {
+  JwtMiddleware,
+} from "./jwt/jwt.middleware";
 
 const Routes = RouterModule.register([
   {
@@ -60,4 +65,11 @@ const Routes = RouterModule.register([
     AppExceptionFilter,
   ],
 })
-export class AppModule { }
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(JwtMiddleware)
+      .forRoutes("*")
+  }
+
+}

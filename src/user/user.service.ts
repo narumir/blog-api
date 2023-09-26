@@ -42,6 +42,10 @@ export class UserService {
     return this.readonlyUserRepository.findOneBy({ email });
   }
 
+  public findOneByID(id: string) {
+    return this.readonlyUserRepository.findOneBy({ id });
+  }
+
   /** auth */
   public signWithEmail(email: string) {
     return this.readonlyUserRepository.createQueryBuilder("user")

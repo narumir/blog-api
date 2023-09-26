@@ -8,6 +8,9 @@ import {
   UseGuards,
 } from "@nestjs/common";
 import {
+  JwtService,
+} from "@nestjs/jwt";
+import {
   Request,
 } from "express";
 import {
@@ -30,6 +33,9 @@ import {
 import {
   Auth,
 } from "./auth.decorator";
+import {
+  AuthToken,
+} from "src/entities";
 
 @Controller()
 export class AuthController {
@@ -80,5 +86,38 @@ export class AuthController {
   @Post("signout")
   public async signout(@Auth() userid: string, @Body() body: TokenDTO) {
     this.authService.discardRefreshToken(userid, body.token);
+  }
+
+  @UseGuards(AuthGuard)
+  @Post("access-token")
+  public async renewAccessToken(@Auth() userid: string, @Body() body: TokenDTO) {
+    const exists = await this.authService.findOneByToken(body.token);
+    if (exists == null) {
+      throw new HttpException("Token is invalid", HttpStatus.UNAUTHORIZED);
+    }
+    const user = await this.userService.findOneByID(userid);
+    if (user == null) {
+      throw new HttpException("Token is invalid", HttpStatus.UNAUTHORIZED);
+    }
+    const { token: accessToken, expiredAt: accessTokenExpiredAt } = await this.authService.issueAccessToken(user);
+    return { accessToken, accessTokenExpiredAt };
+  }
+
+  @UseGuards(AuthToken)
+  @Post("renew-token")
+  public async renewRefreshToken(@Auth() userid: string, @Req() req: Request, @Body() body: TokenDTO) {
+    const exists = await this.authService.findOneByToken(body.token);
+    if (exists == null) {
+      throw new HttpException("Token is invalid", HttpStatus.UNAUTHORIZED);
+    }
+    const user = await this.userService.findOneByID(userid);
+    if (user == null) {
+      throw new HttpException("Token is invalid", HttpStatus.UNAUTHORIZED);
+    }
+    const { token: refreshToken, expiredAt: refreshTokenExpiredAt } = await this.authService.issueRefreshToken(user);
+    const { agent, ip } = this.authService.getAgentAndIP(req);
+    await this.authService.saveRefreshToken(user, refreshToken, refreshTokenExpiredAt, agent, ip);
+    await this.authService.discardRefreshToken(userid, body.token);
+    return { refreshToken, refreshTokenExpiredAt };
   }
 }

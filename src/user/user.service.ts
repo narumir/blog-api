@@ -42,6 +42,14 @@ export class UserService {
     return this.readonlyUserRepository.findOneBy({ email });
   }
 
+  /** auth */
+  public signWithEmail(email: string) {
+    return this.readonlyUserRepository.createQueryBuilder("user")
+      .where("user.email = :email", { email })
+      .addSelect(["user.salt", "user.password"])
+      .getOne();
+  }
+
   public findOneByNickname(nickname: string) {
     return this.readonlyUserRepository.findOneBy({ nickname });
   }

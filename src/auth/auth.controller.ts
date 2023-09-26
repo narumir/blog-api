@@ -53,7 +53,7 @@ export class AuthController {
 
   @Post("signin")
   public async signin(@Req() req: Request, @Body() body: SignInDTO) {
-    const user = await this.userService.findOneByEmail(body.email);
+    const user = await this.userService.signWithEmail(body.email);
     if (user == null) {
       throw new HttpException("Unable to signin", HttpStatus.UNAUTHORIZED);
     }

@@ -5,6 +5,7 @@ import {
   HttpStatus,
   Post,
   Req,
+  UseGuards,
 } from "@nestjs/common";
 import {
   Request,
@@ -18,10 +19,17 @@ import {
 import {
   SignInDTO,
   SignUpDTO,
+  TokenDTO,
 } from "./dto";
 import {
   AuthService,
 } from "./auth.service";
+import {
+  AuthGuard,
+} from "./auth.guard";
+import {
+  Auth,
+} from "./auth.decorator";
 
 @Controller()
 export class AuthController {
@@ -66,5 +74,11 @@ export class AuthController {
     const { agent, ip } = this.authService.getAgentAndIP(req);
     await this.authService.saveRefreshToken(user, refreshToken, refreshTokenExpiredAt, agent, ip);
     return { accessToken, accessTokenExpiredAt, refreshToken, refreshTokenExpiredAt };
+  }
+
+  @UseGuards(AuthGuard)
+  @Post("signout")
+  public async signout(@Auth() userid: string, @Body() body: TokenDTO) {
+    this.authService.discardRefreshToken(userid, body.token);
   }
 }

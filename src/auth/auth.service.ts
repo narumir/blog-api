@@ -82,8 +82,8 @@ export class AuthService {
     return false;
   }
 
-  public discardRefreshToken(token: string) {
-    return this.authRepository.delete({ token });
+  public discardRefreshToken(user: string, token: string) {
+    return this.authRepository.delete({ user: { id: user }, token });
   }
 
   public getAgentAndIP(req: Request) {

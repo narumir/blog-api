@@ -71,5 +71,4 @@ export class AppModule implements NestModule {
       .apply(JwtMiddleware)
       .forRoutes("*")
   }
-
 }

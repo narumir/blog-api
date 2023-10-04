@@ -1,17 +1,21 @@
 import {
+  Inject,
+  Injectable,
+  Provider,
+} from "@nestjs/common";
+import {
+  ConfigService,
+} from "@nestjs/config";
+import {
   KeyObject,
+  constants,
   RsaPrivateKey,
   RsaPublicKey,
-  constants,
   createPrivateKey,
   createPublicKey,
   privateDecrypt,
   publicEncrypt,
 } from "crypto";
-import {
-  Inject,
-  Injectable,
-} from "@nestjs/common";
 
 @Injectable()
 export class EncryptService {
@@ -49,3 +53,16 @@ export class EncryptService {
     return privateDecrypt(key, buffer).toString("utf-8");
   }
 }
+
+export const EncryptKeyProvider: Provider = {
+  provide: "KEY_PROVIDER",
+  inject: [
+    ConfigService,
+  ],
+  useFactory: async (configService: ConfigService) => {
+    return {
+      publicKey: configService.get("encrypt.publicKey").replace(/\\n/g, '\n'),
+      privateKey: configService.get("encrypt.privateKey").replace(/\\n/g, '\n'),
+    };
+  },
+};

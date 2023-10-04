@@ -1,3 +1,4 @@
+import configuration from "src/config/configuration";
 import {
   Test,
 } from "@nestjs/testing";
@@ -5,22 +6,16 @@ import {
   createPublicKey,
 } from "crypto";
 import {
-  AuthModule,
-} from "src/auth/auth.module";
-import {
-  EnvConfig,
-  ReadonlyDatabase,
-  WritableDatabase,
-} from "src/config";
+  ReadonlyDataSource,
+  WritableDataSource,
+} from "src/config/database";
 import {
   EncryptController,
 } from "./encrypt.controller";
 import {
+  EncryptKeyProvider,
   EncryptService,
 } from "./encrypt.service";
-import {
-  KeyProvider,
-} from "./encrypt.module";
 
 describe("Encrypt module", () => {
   let encryptController: EncryptController;
@@ -28,31 +23,27 @@ describe("Encrypt module", () => {
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
       imports: [
-        EnvConfig,
-        ReadonlyDatabase,
-        WritableDatabase,
-        AuthModule,
+        configuration,
+        ReadonlyDataSource,
+        WritableDataSource,
       ],
       controllers: [
         EncryptController,
       ],
       providers: [
-        KeyProvider,
         EncryptService,
+        EncryptKeyProvider,
       ],
     })
       .compile();
     encryptController = moduleRef.get<EncryptController>(EncryptController);
     encryptService = moduleRef.get<EncryptService>(EncryptService);
   });
-  describe("Encrypt controller", () => {
-    it("GET /encrypt/public-key", async () => {
-      const origin = "hello world";
-      const { publicKey } = encryptController.getPublicKey();
-      const key = publicKey.replace(/\\n/g, '\n');
-      const encrypt = encryptService.encode(origin, createPublicKey(key));
-      const decoded = encryptService.decode(encrypt);
-      expect(decoded).toEqual(origin);
-    });
+  it("encrypt and decrypt text", async () => {
+    const origin = "hello world";
+    const publicKey = encryptService.getPublicKey().replace(/\n/, "\n");
+    const encrypt = encryptService.encode(origin, createPublicKey(publicKey));
+    const decrypt = encryptService.decode(encrypt);
+    expect(decrypt).toEqual(origin);
   });
 });

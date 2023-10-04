@@ -5,123 +5,116 @@ import {
   HttpStatus,
   Post,
   Req,
+  UseGuards,
 } from "@nestjs/common";
 import {
   JwtService,
 } from "@nestjs/jwt";
 import {
-  ApiBody,
-} from "@nestjs/swagger";
-import type {
-  FastifyRequest,
-} from "fastify";
-import {
-  UserService,
-} from "src/user/user.service";
+  Request,
+} from "express";
 import {
   EncryptService,
 } from "src/encrypt/encrypt.service";
 import {
-  JoinDTO,
+  UserService,
+} from "src/user/user.service";
+import {
   SignInDTO,
+  SignUpDTO,
   TokenDTO,
 } from "./dto";
 import {
   AuthService,
 } from "./auth.service";
 import {
-  Public,
+  AuthGuard,
 } from "./auth.guard";
 import {
-  ErrorCodes,
-} from "src/error-code";
-
+  Auth,
+} from "./auth.decorator";
 @Controller()
 export class AuthController {
   constructor(
-    private readonly authService: AuthService,
-    private readonly userService: UserService,
-    private readonly jwtService: JwtService,
     private readonly encryptService: EncryptService,
+    private readonly userService: UserService,
+    private readonly authService: AuthService,
+    private readonly jwtService: JwtService,
   ) { }
 
-  @ApiBody({ type: JoinDTO })
-  @Public()
-  @Post("join")
-  async join(@Req() req: FastifyRequest, @Body() body: JoinDTO) {
-    const exists = await this.userService.findOneByUsername(body.username);
-    if (exists != null) {
-      throw new HttpException(ErrorCodes.ALREADY_EXIST, HttpStatus.CONFLICT);
+  @Post("signup")
+  public async signUp(@Req() req: Request, @Body() body: SignUpDTO) {
+    const { email, nickname } = body;
+    const existedEmail = await this.userService.findOneByEmail(email);
+    if (this.authService.checkReservedWord(email) || existedEmail != null) {
+      throw new HttpException("Duplicated email", HttpStatus.BAD_REQUEST);
+    }
+    const existedNickname = await this.userService.findOneByNickname(nickname);
+    if (this.authService.checkReservedWord(nickname) || existedNickname != null) {
+      throw new HttpException("Duplicated nickname", HttpStatus.BAD_REQUEST);
     }
     const password = this.encryptService.decode(body.password);
-    const newUser = await this.userService.createUser(body.username, password, body.nickname);
-    const { refreshToken, expiredAt: refreshTokenExpiredAt } = await this.authService.issueRefreshToken(newUser);
-    const { accessToken, expiredAt: accessTokenExpiredAt } = await this.authService.issueAccessToken(newUser);
+    const user = await this.userService.createUser(email, nickname, password);
+    const { token: refreshToken, expiredAt: refreshTokenExpiredAt } = await this.authService.issueRefreshToken(user);
+    const { token: accessToken, expiredAt: accessTokenExpiredAt } = await this.authService.issueAccessToken(user);
     const { agent, ip } = this.authService.getAgentAndIP(req);
-    await this.authService.saveRefreshToken(newUser, refreshToken, refreshTokenExpiredAt, agent, ip);
+    await this.authService.saveRefreshToken(user, refreshToken, refreshTokenExpiredAt, agent, ip);
     return { accessToken, accessTokenExpiredAt, refreshToken, refreshTokenExpiredAt };
   }
 
-  @ApiBody({ type: SignInDTO })
-  @Public()
   @Post("signin")
-  async signin(@Req() req: FastifyRequest, @Body() body: SignInDTO) {
-    const user = await this.userService.findOneByUsername(body.username);
+  public async signin(@Req() req: Request, @Body() body: SignInDTO) {
+    const user = await this.userService.signWithEmail(body.email);
     if (user == null) {
-      throw new HttpException(ErrorCodes.AUTHENTICATION_FAILED, HttpStatus.UNAUTHORIZED);
+      throw new HttpException("Unable to signin", HttpStatus.UNAUTHORIZED);
     }
     const password = this.encryptService.decode(body.password);
     if (await this.userService.verifyPassword(user, password) == false) {
-      throw new HttpException(ErrorCodes.AUTHENTICATION_FAILED, HttpStatus.UNAUTHORIZED);
+      throw new HttpException("Unable to signin", HttpStatus.UNAUTHORIZED);
     }
-    const { refreshToken, expiredAt: refreshTokenExpiredAt } = await this.authService.issueRefreshToken(user);
-    const { accessToken, expiredAt: accessTokenExpiredAt } = await this.authService.issueAccessToken(user);
+    const { token: refreshToken, expiredAt: refreshTokenExpiredAt } = await this.authService.issueRefreshToken(user);
+    const { token: accessToken, expiredAt: accessTokenExpiredAt } = await this.authService.issueAccessToken(user);
     const { agent, ip } = this.authService.getAgentAndIP(req);
     await this.authService.saveRefreshToken(user, refreshToken, refreshTokenExpiredAt, agent, ip);
     return { accessToken, accessTokenExpiredAt, refreshToken, refreshTokenExpiredAt };
   }
 
-  @ApiBody({ type: TokenDTO })
+  @UseGuards(AuthGuard)
   @Post("signout")
-  async signout(@Body() body: TokenDTO) {
-    await this.authService.discardRefreshToken(body.token);
-    return { success: true };
+  public async signout(@Auth() userid: string, @Body() body: TokenDTO) {
+    this.authService.discardRefreshToken(userid, body.token);
   }
 
-  @ApiBody({ type: TokenDTO })
-  @Public()
   @Post("access-token")
-  async renewAccessToken(@Body() body: TokenDTO) {
+  public async renewAccessToken(@Body() body: TokenDTO) {
     const decode = await this.jwtService.verifyAsync(body.token);
     const exists = await this.authService.findOneByToken(body.token);
     if (exists == null) {
-      throw new HttpException(ErrorCodes.NOT_EXIST, HttpStatus.UNAUTHORIZED);
+      throw new HttpException("Token is invalid", HttpStatus.UNAUTHORIZED);
     }
     const user = await this.userService.findOneByID(decode["sub"]);
     if (user == null) {
-      throw new HttpException(ErrorCodes.NOT_EXIST, HttpStatus.UNAUTHORIZED);
+      throw new HttpException("Token is invalid", HttpStatus.UNAUTHORIZED);
     }
-    const { accessToken, expiredAt: accessTokenExpiredAt } = await this.authService.issueAccessToken(user);
+    const { token: accessToken, expiredAt: accessTokenExpiredAt } = await this.authService.issueAccessToken(user);
     return { accessToken, accessTokenExpiredAt };
   }
 
-  @ApiBody({ type: TokenDTO })
-  @Public()
-  @Post("refresh-token")
-  async renewRefreshToken(@Req() req: FastifyRequest, @Body() body: TokenDTO) {
+  @Post("renew-token")
+  public async renewRefreshToken(@Req() req: Request, @Body() body: TokenDTO) {
     const decode = await this.jwtService.verifyAsync(body.token);
     const exists = await this.authService.findOneByToken(body.token);
     if (exists == null) {
-      throw new HttpException(ErrorCodes.NOT_EXIST, HttpStatus.UNAUTHORIZED);
+      throw new HttpException("Token is invalid", HttpStatus.UNAUTHORIZED);
     }
     const user = await this.userService.findOneByID(decode["sub"]);
     if (user == null) {
-      throw new HttpException(ErrorCodes.NOT_EXIST, HttpStatus.UNAUTHORIZED);
+      throw new HttpException("Token is invalid", HttpStatus.UNAUTHORIZED);
     }
-    const { refreshToken, expiredAt: refreshTokenExpiredAt } = await this.authService.issueRefreshToken(user);
+    const { token: refreshToken, expiredAt: refreshTokenExpiredAt } = await this.authService.issueRefreshToken(user);
     const { agent, ip } = this.authService.getAgentAndIP(req);
     await this.authService.saveRefreshToken(user, refreshToken, refreshTokenExpiredAt, agent, ip);
-    await this.authService.discardRefreshToken(body.token);
+    await this.authService.discardRefreshToken(decode["sub"], body.token);
     return { refreshToken, refreshTokenExpiredAt };
   }
 }

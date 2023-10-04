@@ -3,9 +3,6 @@ import {
   Get,
 } from "@nestjs/common";
 import {
-  Public,
-} from "src/auth/auth.guard";
-import {
   EncryptService,
 } from "./encrypt.service";
 
@@ -15,10 +12,8 @@ export class EncryptController {
     private readonly encryptService: EncryptService,
   ) { }
 
-  @Public()
-  @Get("public-key")
-  getPublicKey() {
-    const publicKey = this.encryptService.getPublicKey();
-    return { publicKey };
+  @Get("publickey")
+  public getPublicKey() {
+    return this.encryptService.getPublicKey();
   }
 }

@@ -22,41 +22,39 @@ export class UserService {
     private readonly userRepository: Repository<User>,
   ) { }
 
-  /** auth */
-  findOneByUsername(username: string) {
-    return this.readonlyUserRepository.createQueryBuilder("user")
-      .where("user.username = :username", { username })
-      .addSelect(["user.username", "user.password", "user.salt"])
-      .getOne();
+  public async createUser(email: string, nickname: string, password: string) {
+    const user = new User();
+    user.email = email;
+    user.nickname = nickname;
+    user.profile = "/profile.webp";
+    const salt = crypto.randomBytes(32);
+    user.password = await argon.hash(password, { salt, type: argon.argon2id, raw: true });
+    user.salt = salt;
+    return this.userRepository.save(user);
   }
 
-  findOneByID(id: string) {
-    return this.readonlyUserRepository.findOneBy({ id });
-  }
-
-  async verifyPassword(user: User, password: string) {
-    const salt = Buffer.from(user.salt, "hex");
-    const encryptedPasswrod = await argon.hash(password, { salt, type: argon.argon2id, raw: true });
+  public async verifyPassword(user: User, password) {
+    const encryptedPasswrod = await argon.hash(password, { salt: user.salt, type: argon.argon2id, raw: true });
     return user.password.equals(encryptedPasswrod);
   }
 
-  async createUser(username: string, password: string, nickname: string) {
-    const user = new User();
-    user.username = username;
-    const salt = crypto.randomBytes(32);
-    user.salt = salt.toString("hex");
-    const encryptedPasswrod = await argon.hash(password, { salt, type: argon.argon2id, raw: true });
-    user.password = encryptedPasswrod;
-    user.nickname = nickname;
-    return this.userRepository.save(user);
+  public findOneByEmail(email: string) {
+    return this.readonlyUserRepository.findOneBy({ email });
   }
 
-  async changePassword(userId: string, password: string) {
-    const user = await this.findOneByID(userId);
-    const salt = crypto.randomBytes(32);
-    const encryptedPasswrod = await argon.hash(password, { salt, type: argon.argon2id, raw: true });
-    user.salt = salt.toString("hex");
-    user.password = encryptedPasswrod;
-    return this.userRepository.save(user);
+  public findOneByID(id: string) {
+    return this.readonlyUserRepository.findOneBy({ id });
+  }
+
+  /** auth */
+  public signWithEmail(email: string) {
+    return this.readonlyUserRepository.createQueryBuilder("user")
+      .where("user.email = :email", { email })
+      .addSelect(["user.salt", "user.password"])
+      .getOne();
+  }
+
+  public findOneByNickname(nickname: string) {
+    return this.readonlyUserRepository.findOneBy({ nickname });
   }
 }

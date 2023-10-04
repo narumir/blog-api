@@ -1,83 +1,74 @@
+import Configuration from "src/config/configuration";
 import {
+  MiddlewareConsumer,
   Module,
+  NestModule,
 } from '@nestjs/common';
 import {
   RouterModule,
-} from '@nestjs/core';
+} from "@nestjs/core";
 import {
-  EnvConfig,
-  ReadonlyDatabase,
-  WritableDatabase,
-} from './config';
+  ReadonlyDataSource,
+  WritableDataSource,
+} from "src/config/database";
 import {
   UserModule,
-} from './user/user.module';
-import {
-  JWTModule,
-} from './auth/jwt/jwt.module';
+} from "./user/user.module";
 import {
   AuthModule,
-} from './auth/auth.module';
+} from "./auth/auth.module";
+import {
+  AppExceptionFilter,
+} from "./app.exception-filter";
 import {
   EncryptModule,
-} from './encrypt/encrypt.module';
+} from "./encrypt/encrypt.module";
 import {
-  PostModule,
-} from './post/post.module';
+  JWTFactory,
+} from "./jwt/jwt.module";
 import {
-  ValidationExceptionFilterProvider,
-} from './validation-exception-filter';
-import {
-  HttpExceptionFilterProvider,
-} from './exception-filter';
-import {
-  HealthModule,
-} from './health/health.module';
+  JwtMiddleware,
+} from "./jwt/jwt.middleware";
 
 const Routes = RouterModule.register([
   {
     path: "v1",
     children: [
       {
-        path: "users",
-        module: UserModule,
-      },
-      {
         path: "auth",
         module: AuthModule,
       },
       {
+        path: "users",
+        module: UserModule,
+      },
+      {
         path: "encrypt",
         module: EncryptModule,
-      },
-      {
-        path: "posts",
-        module: PostModule,
-      },
-      {
-        path: "health",
-        module: HealthModule,
-      },
+      }
     ],
   },
 ]);
 
 @Module({
   imports: [
-    EnvConfig,
-    ReadonlyDatabase,
-    WritableDatabase,
+    Configuration,
+    ReadonlyDataSource,
+    WritableDataSource,
     Routes,
-    JWTModule,
-    UserModule,
+    JWTFactory,
     AuthModule,
+    UserModule,
     EncryptModule,
-    PostModule,
-    HealthModule,
   ],
   providers: [
-    ValidationExceptionFilterProvider,
-    HttpExceptionFilterProvider,
+    AppExceptionFilter,
   ],
 })
-export class AppModule { }
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(JwtMiddleware)
+      .forRoutes("*")
+  }
+}

@@ -5,16 +5,16 @@ import {
   ManyToOne,
 } from "typeorm";
 import {
-  BaseEntity,
-} from "./base-entity";
+  CommonEntity,
+} from "./common-entity";
 import {
   User,
-} from "src/entities";
+} from "./user";
 
 @Entity({
   name: "auth_token",
 })
-export class AuthToken extends BaseEntity {
+export class AuthToken extends CommonEntity {
   @Column({
     name: "browser",
     nullable: true,

@@ -4,56 +4,66 @@ import {
   OneToMany,
 } from "typeorm";
 import {
-  BaseEntity,
-} from "./base-entity";
+  CommonEntity,
+} from "./common-entity";
 import {
   AuthToken,
-  Post,
-} from "src/entities";
+} from "./auth-token";
 
 @Entity({
   name: "user",
 })
-export class User extends BaseEntity {
+export class User extends CommonEntity {
 
   @Column({
-    name: "username",
-    nullable: false,
     type: "varchar",
     length: 320,
+    nullable: false,
     unique: true,
-    select: false,
+    name: "email",
   })
-  username: string;
+  email: string;
 
   @Column({
-    name: "password",
+    type: "varchar",
+    length: 32,
     nullable: false,
+    unique: true,
+    name: "nickname",
+  })
+  nickname: string;
+
+  @Column({
+    type: "varchar",
+    length: 160,
+    nullable: true,
+    name: "bio",
+  })
+  bio?: string;
+
+  @Column({
+    type: "text",
+    nullable: false,
+    name: "profile",
+  })
+  profile: string;
+
+  @Column({
     type: "bytea",
+    nullable: false,
+    name: "password",
     select: false,
   })
   password: Buffer;
 
   @Column({
-    name: "salt",
+    type: "bytea",
     nullable: false,
-    type: "char",
-    length: 64,
+    name: "salt",
     select: false,
   })
-  salt: string;
-
-  @Column({
-    name: "nickname",
-    nullable: false,
-    type: "varchar",
-    length: 32,
-  })
-  nickname: string;
+  salt: Buffer;
 
   @OneToMany(() => AuthToken, (token) => token.user, { onDelete: "CASCADE" })
   tokens: AuthToken[];
-
-  @OneToMany(() => Post, (post) => post.user, { onDelete: "CASCADE" })
-  posts: Post[];
 }

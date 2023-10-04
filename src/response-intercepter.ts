@@ -1,7 +1,6 @@
 import {
   CallHandler,
   ExecutionContext,
-  Injectable,
   NestInterceptor,
 } from "@nestjs/common";
 import {
@@ -9,9 +8,10 @@ import {
   map,
 } from "rxjs";
 
-@Injectable()
 export class ResponseIntercepter implements NestInterceptor {
-  intercept(_context: ExecutionContext, next: CallHandler<any>): Observable<any> | Promise<Observable<any>> {
-    return next.handle().pipe(map((data) => ({ data })));
+  intercept(_: ExecutionContext, next: CallHandler<any>): Observable<any> | Promise<Observable<any>> {
+    return next
+      .handle()
+      .pipe(map((data) => ({ data })));
   }
 }

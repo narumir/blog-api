@@ -1,5 +1,7 @@
 import * as fs from "node:fs";
 import * as path from "path";
+import * as cookieParser from "cookie-parser";
+import helmet from "helmet";
 import {
   NestFactory,
 } from "@nestjs/core";
@@ -34,7 +36,25 @@ async function bootstrap() {
     const documentFactory = () => SwaggerModule.createDocument(app, swaggerConfig);
     SwaggerModule.setup("/api", app, documentFactory);
   }
-  app.useGlobalPipes(new ValidationPipe());
+  app.enableCors({
+    origin: (origin, callback) => {
+      if (!origin || !configService.get<boolean>("isProduction")) {
+        return callback(null, true);
+      }
+      if (/^(https?:\/\/)?(([\w\d-\.]*)?\.)?narumir.io/.test(origin)) {
+        return callback(null, true);
+      }
+      return callback(null, false);
+    },
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    credentials: true,
+    optionsSuccessStatus: 204,
+    preflightContinue: false,
+  });
+  app
+    .use(cookieParser())
+    .use(helmet())
+    .useGlobalPipes(new ValidationPipe());
   await app.listen(port);
 }
 

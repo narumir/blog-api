@@ -79,6 +79,20 @@ export class AuthController {
       });
   }
 
+  @ApiOperation({ summary: "logout", description: "logout" })
+  @ApiResponse({ status: HttpStatus.NO_CONTENT, description: "logout has been successful" })
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @UseGuards(AuthGuard)
+  @Post("logout")
+  public logout(
+    @Res() res: Response,
+  ) {
+    return res
+      .clearCookie("refresh-token")
+      .end();
+  }
+
   @ApiOperation({ summary: "register", description: "sign up for membership" })
   @ApiConsumes("application/json")
   @ApiProduces("application/json")

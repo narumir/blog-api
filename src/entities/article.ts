@@ -1,10 +1,15 @@
 import {
   Column,
   Entity,
+  JoinColumn,
+  ManyToOne,
 } from "typeorm";
 import {
   DefaultEntity,
 } from "./default-entity";
+import {
+  Member,
+} from "./member";
 
 export enum ArticleStatus {
   DRAFT = "DRAFT",
@@ -47,4 +52,8 @@ export class Article extends DefaultEntity {
     nullable: true,
   })
   publishedAt: Date;
+
+  @ManyToOne(() => Member, { nullable: false, onDelete: "CASCADE" })
+  @JoinColumn({ name: "member_id" })
+  member: Member;
 }

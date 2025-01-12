@@ -38,4 +38,8 @@ export class MemberService {
     const result = await this.memberRepository.delete({ id: memberId });
     return result.affected === 1;
   }
+
+  public getMemberById(memberId: number) {
+    return this.memberRepository.findOneBy({ id: memberId });
+  }
 }

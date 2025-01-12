@@ -5,13 +5,16 @@ import {
   HttpCode,
   HttpStatus,
   Post,
+  Req,
   Res,
+  UnauthorizedException,
   UseGuards,
 } from "@nestjs/common";
 import {
   ApiBearerAuth,
   ApiBody,
   ApiConsumes,
+  ApiCookieAuth,
   ApiOkResponse,
   ApiOperation,
   ApiProduces,
@@ -22,6 +25,7 @@ import {
   ConfigService,
 } from "@nestjs/config";
 import {
+  Request,
   Response,
 } from "express";
 import {
@@ -134,5 +138,30 @@ export class AuthController {
   ) {
     await this.memberService.withdraw(memberId);
     return;
+  }
+
+  @ApiOperation({ summary: "issue access token", description: "issue new access token" })
+  @ApiProduces("application/json")
+  @ApiOkResponse({ type: TokenRes, description: "reissue has been successful" })
+  @ApiCookieAuth()
+  @HttpCode(HttpStatus.OK)
+  @Post("access-token")
+  public async reissue(
+    @Req() req: Request,
+  ) {
+    const refreshToken: string = req.cookies["refresh-token"];
+    try {
+      const verify = this.authService.verifyRefreshToken(refreshToken);
+      const memberId = parseInt(verify["sub"] as string, 10);
+      const member = await this.memberService.getMemberById(memberId);
+      const accessToken = this.authService.generateAccessToken(member);
+      const accessTokenExpires = this.authService.getExpireDate(accessToken);
+      return {
+        accessToken,
+        accessTokenExpires,
+      };
+    } catch (e) {
+      throw new UnauthorizedException("Invalid token");
+    }
   }
 }

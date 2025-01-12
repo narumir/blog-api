@@ -29,6 +29,7 @@ async function bootstrap() {
       .setDescription("API Document")
       .setVersion(pkg.version)
       .addBearerAuth()
+      .addCookieAuth("refresh-token")
       .build();
     const documentFactory = () => SwaggerModule.createDocument(app, swaggerConfig);
     SwaggerModule.setup("/api", app, documentFactory);

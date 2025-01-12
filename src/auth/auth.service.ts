@@ -72,4 +72,9 @@ export class AuthService {
   private verifyPassword(hash: string, password: string) {
     return argon.verify(hash, password, { secret: this.authSecret });
   }
+
+  public verifyRefreshToken(token: string) {
+    const refreshTokeneSecret = this.configService.getOrThrow<string>("jwt.refreshTokeneSecret");
+    return jwt.verify(token, refreshTokeneSecret);
+  }
 }

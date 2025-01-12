@@ -11,10 +11,14 @@ import {
 } from "typeorm";
 import {
   Article,
+  Member,
+  MemberCredential,
 } from "src/entities";
 
 const entities: MixedList<string | Function | EntitySchema<any>> = [
   Article,
+  Member,
+  MemberCredential,
 ];
 
 export const DataSourse = TypeOrmModule.forRootAsync({

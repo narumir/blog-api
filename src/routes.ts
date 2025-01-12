@@ -2,6 +2,9 @@ import {
   RouterModule,
 } from "@nestjs/core";
 import {
+  AuthModule,
+} from "./auth/auth.module";
+import {
   ArticleModule,
 } from "./article/article.module";
 
@@ -13,6 +16,10 @@ export const Routes = RouterModule.register([
         path: "v1",
         children: [
           {
+            path: "auth",
+            module: AuthModule,
+          },
+          {
             path: "articles",
             module: ArticleModule,
           },
@@ -23,5 +30,6 @@ export const Routes = RouterModule.register([
 ]);
 
 export const RegisteredModules = [
+  AuthModule,
   ArticleModule,
 ];

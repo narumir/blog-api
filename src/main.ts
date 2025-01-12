@@ -1,4 +1,5 @@
-import * as pkg from "../package.json";
+import * as fs from "node:fs";
+import * as path from "path";
 import {
   NestFactory,
 } from "@nestjs/core";
@@ -22,6 +23,7 @@ async function bootstrap() {
   const port = configService.getOrThrow<number>("port");
   const isProduction = configService.getOrThrow<boolean>("isProduction");
   if (!isProduction) {
+    const pkg = JSON.parse(fs.readFileSync(path.resolve(__dirname, "../package.json"), "utf-8"));
     const swaggerConfig = new DocumentBuilder()
       .setTitle(pkg.name)
       .setDescription("API Document")

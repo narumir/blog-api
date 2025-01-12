@@ -7,6 +7,9 @@ import {
 import {
   ArticleModule,
 } from "./article/article.module";
+import {
+  MemberModule,
+} from "./member/member.module";
 
 export const Routes = RouterModule.register([
   {
@@ -20,6 +23,10 @@ export const Routes = RouterModule.register([
             module: AuthModule,
           },
           {
+            path: "members",
+            module: MemberModule,
+          },
+          {
             path: "articles",
             module: ArticleModule,
           },
@@ -31,5 +38,6 @@ export const Routes = RouterModule.register([
 
 export const RegisteredModules = [
   AuthModule,
+  MemberModule,
   ArticleModule,
 ];

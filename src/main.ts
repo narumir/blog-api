@@ -10,6 +10,9 @@ import {
   SwaggerModule,
 } from "@nestjs/swagger";
 import {
+  ValidationPipe,
+} from "@nestjs/common";
+import {
   AppModule,
 } from "./app.module";
 
@@ -27,6 +30,7 @@ async function bootstrap() {
     const documentFactory = () => SwaggerModule.createDocument(app, swaggerConfig);
     SwaggerModule.setup("/api", app, documentFactory);
   }
+  app.useGlobalPipes(new ValidationPipe());
   await app.listen(port);
 }
 

@@ -33,7 +33,7 @@ export class MemberCredential extends DefaultEntity {
   })
   password: string;
 
-  @OneToOne(() => Member, { nullable: false })
+  @OneToOne(() => Member, { nullable: false, onDelete: "CASCADE" })
   @JoinColumn({ name: "member_id" })
   member: Member;
 }

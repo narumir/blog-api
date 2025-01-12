@@ -23,6 +23,8 @@ export class Member extends DefaultEntity {
     type: "text",
     name: "profile_image",
     nullable: false,
+    // TODO: Add default profile image
+    default: "",
   })
   profileImage: string;
 }

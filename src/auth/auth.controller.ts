@@ -6,8 +6,10 @@ import {
   HttpStatus,
   Post,
   Res,
+  UseGuards,
 } from "@nestjs/common";
 import {
+  ApiBearerAuth,
   ApiBody,
   ApiConsumes,
   ApiOkResponse,
@@ -34,6 +36,7 @@ import {
   TokenRes,
 } from "./dto";
 import {
+  AuthGuard,
   UserAuth,
 } from "./auth.guard";
 
@@ -108,7 +111,9 @@ export class AuthController {
 
   @ApiOperation({ summary: "withdraw", description: "withdraw for membership" })
   @ApiResponse({ status: HttpStatus.NO_CONTENT, description: "withdraw has been successful." })
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.NO_CONTENT)
+  @UseGuards(AuthGuard)
   @Delete("withdraw")
   public async withdraw(
     @UserAuth() memberId: number,

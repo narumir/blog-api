@@ -3,9 +3,11 @@ import {
 } from "@nestjs/common";
 import {
   InjectDataSource,
+  InjectRepository,
 } from "@nestjs/typeorm";
 import {
   DataSource,
+  Repository,
 } from "typeorm";
 import {
   Member,
@@ -18,6 +20,8 @@ export class MemberService {
   constructor(
     @InjectDataSource()
     private readonly datasource: DataSource,
+    @InjectRepository(Member)
+    private readonly memberRepository: Repository<Member>,
   ) { }
 
   public register(username: string, hash: string, nickname: string) {
@@ -28,5 +32,10 @@ export class MemberService {
       credentials = await entityManager.save(credentials);
       return member;
     });
+  }
+
+  public async withdraw(memberId: number) {
+    const result = await this.memberRepository.delete({ id: memberId });
+    return result.affected === 1;
   }
 }

@@ -1,4 +1,4 @@
-import argon from "argon2";
+import * as argon from "argon2";
 import * as jwt from "jsonwebtoken";
 import {
   Injectable,

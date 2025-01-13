@@ -52,6 +52,7 @@ async function bootstrap() {
     preflightContinue: false,
   });
   app
+    .enableShutdownHooks()
     .use(cookieParser())
     .use(helmet())
     .useGlobalPipes(new ValidationPipe());

@@ -27,7 +27,7 @@ export class Article extends DefaultEntity {
     name: "status",
     nullable: false,
     enum: ArticleStatus,
-    default: ArticleStatus.DRAFT,
+    default: ArticleStatus.PUBLISHED,
   })
   status: ArticleStatus;
 
@@ -50,6 +50,7 @@ export class Article extends DefaultEntity {
     type: "timestamptz",
     name: "published_at",
     nullable: true,
+    default: () => "now()",
   })
   publishedAt: Date;
 

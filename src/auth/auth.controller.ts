@@ -37,7 +37,7 @@ import {
 import {
   LoginDTO,
   RegisterDTO,
-  TokenRes,
+  TokenDTO,
 } from "./dto";
 import {
   AuthGuard,
@@ -58,9 +58,9 @@ export class AuthController {
   @ApiConsumes("application/json")
   @ApiProduces("application/json")
   @ApiBody({ type: LoginDTO })
-  @ApiOkResponse({ type: TokenRes, description: "login has been successful" })
-  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({ type: TokenDTO, description: "login has been successful" })
   @Post("login")
+  @HttpCode(HttpStatus.OK)
   public async login(
     @Res() res: Response,
     @Body() body: LoginDTO,
@@ -77,18 +77,15 @@ export class AuthController {
         sameSite: "none",
         expires: refreshTokenExpires
       })
-      .json({
-        accessToken,
-        accessTokenExpires,
-      });
+      .json(TokenDTO.fromData(accessToken, accessTokenExpires));
   }
 
   @ApiOperation({ summary: "logout", description: "logout" })
   @ApiResponse({ status: HttpStatus.NO_CONTENT, description: "logout has been successful" })
   @ApiBearerAuth()
-  @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(AuthGuard)
   @Post("logout")
+  @HttpCode(HttpStatus.NO_CONTENT)
   public logout(
     @Res() res: Response,
   ) {
@@ -101,9 +98,9 @@ export class AuthController {
   @ApiConsumes("application/json")
   @ApiProduces("application/json")
   @ApiBody({ type: RegisterDTO })
-  @ApiOkResponse({ type: TokenRes, description: "registration has been successful" })
-  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({ type: TokenDTO, description: "registration has been successful" })
   @Post("register")
+  @HttpCode(HttpStatus.OK)
   public async register(
     @Res() res: Response,
     @Body() body: RegisterDTO,
@@ -121,18 +118,15 @@ export class AuthController {
         sameSite: "none",
         expires: refreshTokenExpires
       })
-      .json({
-        accessToken,
-        accessTokenExpires,
-      });
+      .json(TokenDTO.fromData(accessToken, accessTokenExpires));
   }
 
   @ApiOperation({ summary: "withdraw", description: "withdraw for membership" })
   @ApiResponse({ status: HttpStatus.NO_CONTENT, description: "withdraw has been successful." })
   @ApiBearerAuth()
-  @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(AuthGuard)
   @Delete("withdraw")
+  @HttpCode(HttpStatus.NO_CONTENT)
   public async withdraw(
     @UserAuth() memberId: number,
   ) {
@@ -142,10 +136,10 @@ export class AuthController {
 
   @ApiOperation({ summary: "issue access token", description: "issue new access token" })
   @ApiProduces("application/json")
-  @ApiOkResponse({ type: TokenRes, description: "reissue has been successful" })
+  @ApiOkResponse({ type: TokenDTO, description: "reissue has been successful" })
   @ApiCookieAuth()
-  @HttpCode(HttpStatus.OK)
   @Post("access-token")
+  @HttpCode(HttpStatus.OK)
   public async reissue(
     @Req() req: Request,
   ) {
@@ -156,10 +150,7 @@ export class AuthController {
       const member = await this.memberService.getMemberById(memberId);
       const accessToken = this.authService.generateAccessToken(member);
       const accessTokenExpires = this.authService.getExpireDate(accessToken);
-      return {
-        accessToken,
-        accessTokenExpires,
-      };
+      return TokenDTO.fromData(accessToken, accessTokenExpires);
     } catch (e) {
       throw new UnauthorizedException("Invalid token");
     }

@@ -1,3 +1,3 @@
 export * from "./register.dto";
 export * from "./login.dto";
-export * from "./token.res";
+export * from "./token.dto";

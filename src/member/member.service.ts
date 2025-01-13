@@ -42,4 +42,12 @@ export class MemberService {
   public getMemberById(memberId: number) {
     return this.memberRepository.findOneBy({ id: memberId });
   }
+
+  public async updateProfile(memberId: number, nickname: string, profileImage: string) {
+    const result = await this.memberRepository.update(
+      { id: memberId },
+      { nickname, profileImage },
+    );
+    return result.affected === 1;
+  }
 }

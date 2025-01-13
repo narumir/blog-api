@@ -11,13 +11,16 @@ import {
 import {
   MemberService,
 } from "./member.service";
+import {
+  MemberController,
+} from "./member.controller";
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Member, MemberCredential]),
   ],
   controllers: [
-
+    MemberController,
   ],
   providers: [
     MemberService,

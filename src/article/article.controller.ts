@@ -30,6 +30,9 @@ import {
   UserAuth,
 } from "src/auth/auth.guard";
 import {
+  ArticleStatus,
+} from "src/entities";
+import {
   ArticleService,
 } from "./article.service";
 import {
@@ -37,7 +40,6 @@ import {
   UpdateArticleDTO,
   WriteArticleDTO,
 } from "./dto";
-import { ArticleStatus } from "src/entities";
 
 @ApiTags("Article")
 @Controller()

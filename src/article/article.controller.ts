@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Delete,
+  ForbiddenException,
   Get,
   HttpCode,
   HttpStatus,
@@ -114,8 +115,15 @@ export class ArticleController {
     @Param("article_id", new ParseIntPipe()) articleId: number,
     @Body() body: UpdateArticleDTO,
   ) {
-    const article = await this.articleService.updateArticle(memberId, articleId, body.status, body.title, body.content);
-    return ArticleDTO.fromEntity(article);
+    const article = await this.articleService.readArticle(articleId);
+    if (article == null) {
+      throw new NotFoundException("article not found");
+    }
+    if (article.member.id !== memberId) {
+      throw new ForbiddenException("no permission to update this article");
+    }
+    const result = await this.articleService.updateArticle(article, body.status, body.title, body.content);
+    return ArticleDTO.fromEntity(result);
   }
 
   @ApiOperation({ summary: "delete article", description: "delete article" })
@@ -128,7 +136,14 @@ export class ArticleController {
     @UserAuth() memberId: number,
     @Param("article_id", new ParseIntPipe()) articleId: number,
   ) {
-    await this.articleService.deleteArticle(memberId, articleId);
+    const article = await this.articleService.readArticle(articleId);
+    if (article == null) {
+      throw new NotFoundException("article not found");
+    }
+    if (article.member.id !== memberId) {
+      throw new ForbiddenException("no permission to delete this article");
+    }
+    await this.articleService.deleteArticle(article);
     return;
   }
 }

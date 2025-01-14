@@ -1,7 +1,5 @@
 import {
-  ForbiddenException,
   Injectable,
-  NotFoundException,
 } from "@nestjs/common";
 import {
   InjectRepository,
@@ -59,14 +57,7 @@ export class ArticleService {
     });
   }
 
-  public async updateArticle(memberId: number, articleId: number, status: ArticleStatus, title: string, content: string) {
-    const article = await this.readArticle(articleId);
-    if (article == null) {
-      throw new NotFoundException("article not found");
-    }
-    if (article.member.id !== memberId) {
-      throw new ForbiddenException("no permission to update this article");
-    }
+  public async updateArticle(article: Article, status: ArticleStatus, title: string, content: string) {
     if (article.status !== status && status === ArticleStatus.PUBLISHED) {
       article.publishedAt = new Date();
     }
@@ -76,14 +67,7 @@ export class ArticleService {
     return this.articleRepository.save(article);
   }
 
-  public async deleteArticle(memberId: number, articleId: number) {
-    const article = await this.readArticle(articleId);
-    if (article == null) {
-      throw new NotFoundException("article not found");
-    }
-    if (article.member.id !== memberId) {
-      throw new ForbiddenException("no permission to delete this article");
-    }
+  public async deleteArticle(article: Article) {
     const result = await this.articleRepository.delete(article);
     return result.affected === 1;
   }

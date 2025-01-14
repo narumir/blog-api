@@ -4,6 +4,7 @@ import {
   Delete,
   HttpCode,
   HttpStatus,
+  Patch,
   Post,
   Req,
   Res,
@@ -38,6 +39,7 @@ import {
   LoginDTO,
   RegisterDTO,
   TokenDTO,
+  UpdatePasswordDTO,
 } from "./dto";
 import {
   AuthGuard,
@@ -66,6 +68,9 @@ export class AuthController {
     @Body() body: LoginDTO,
   ) {
     const member = await this.authService.validateUser(body.username, body.password);
+    if (member == null) {
+      throw new UnauthorizedException("invalid credentials");
+    }
     const accessToken = this.authService.generateAccessToken(member);
     const accessTokenExpires = this.authService.getExpireDate(accessToken);
     const refreshToken = this.authService.generateRefreshToken(member);
@@ -154,5 +159,31 @@ export class AuthController {
     } catch (e) {
       throw new UnauthorizedException("Invalid token");
     }
+  }
+
+  @ApiOperation({ summary: "update password", description: "update password" })
+  @ApiConsumes("application/json")
+  @ApiProduces("application/json")
+  @ApiBearerAuth()
+  @ApiBody({ type: UpdatePasswordDTO })
+  @ApiResponse({ status: HttpStatus.NO_CONTENT })
+  @UseGuards(AuthGuard)
+  @Patch("change-password")
+  @HttpCode(HttpStatus.NO_CONTENT)
+  public async changePassword(
+    @UserAuth() memberId: number,
+    @Body() body: UpdatePasswordDTO,
+  ) {
+    const verify = await this.authService.validateCredentials(memberId, body.currentPassword);
+    if (!verify) {
+      throw new UnauthorizedException("invalid credentials");
+    }
+    const hashPassword = await this.authService.hashPassword(body.newPassword);
+    const result = await this.authService.updatePassword(memberId, hashPassword);
+    if (result) {
+      return;
+    }
+    // wtf?
+    return;
   }
 }

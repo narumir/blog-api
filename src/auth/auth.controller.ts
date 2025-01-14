@@ -4,6 +4,7 @@ import {
   Delete,
   HttpCode,
   HttpStatus,
+  InternalServerErrorException,
   Patch,
   Post,
   Req,
@@ -180,10 +181,9 @@ export class AuthController {
     }
     const hashPassword = await this.authService.hashPassword(body.newPassword);
     const result = await this.authService.updatePassword(memberId, hashPassword);
-    if (result) {
-      return;
+    if (!result) {
+      throw new InternalServerErrorException("update not affected");
     }
-    // wtf?
     return;
   }
 }

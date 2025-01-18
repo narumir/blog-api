@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   InternalServerErrorException,
@@ -55,5 +56,19 @@ export class MemberController {
     }
     const member = await this.memberService.getMemberById(memberId);
     return MemberDTO.fromEntity(member);
+  }
+
+  @ApiOperation({ summary: "get profile", description: "get profile" })
+  @ApiProduces("application/json")
+  @ApiBearerAuth()
+  @ApiOkResponse({ type: MemberDTO })
+  @UseGuards(AuthGuard)
+  @Get("/profile")
+  @HttpCode(HttpStatus.OK)
+  public async readProfile(
+    @UserAuth() memberId: number,
+  ) {
+    const profile = await this.memberService.getMemberById(memberId);
+    return MemberDTO.fromEntity(profile);
   }
 }

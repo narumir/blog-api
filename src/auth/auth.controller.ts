@@ -7,7 +7,6 @@ import {
   InternalServerErrorException,
   Patch,
   Post,
-  Req,
   Res,
   UnauthorizedException,
   UseGuards,
@@ -27,7 +26,6 @@ import {
   ConfigService,
 } from "@nestjs/config";
 import {
-  Request,
   Response,
 } from "express";
 import {
@@ -37,6 +35,8 @@ import {
   MemberService,
 } from "src/member/member.service";
 import {
+  AccessTokenDTO,
+  IssueToken,
   LoginDTO,
   RegisterDTO,
   TokenDTO,
@@ -65,7 +65,6 @@ export class AuthController {
   @Post("login")
   @HttpCode(HttpStatus.OK)
   public async login(
-    @Res() res: Response,
     @Body() body: LoginDTO,
   ) {
     const member = await this.authService.validateUser(body.username, body.password);
@@ -76,14 +75,7 @@ export class AuthController {
     const accessTokenExpires = this.authService.getExpireDate(accessToken);
     const refreshToken = this.authService.generateRefreshToken(member);
     const refreshTokenExpires = this.authService.getExpireDate(refreshToken);
-    return res
-      .cookie("refresh-token", refreshToken, {
-        httpOnly: true,
-        secure: this.configService.getOrThrow<boolean>("isProduction"),
-        sameSite: "none",
-        expires: refreshTokenExpires
-      })
-      .json(TokenDTO.fromData(accessToken, accessTokenExpires));
+    return TokenDTO.fromData(accessToken, accessTokenExpires, refreshToken, refreshTokenExpires);
   }
 
   @ApiOperation({ summary: "logout", description: "logout" })
@@ -117,14 +109,7 @@ export class AuthController {
     const accessTokenExpires = this.authService.getExpireDate(accessToken);
     const refreshToken = this.authService.generateRefreshToken(member);
     const refreshTokenExpires = this.authService.getExpireDate(refreshToken);
-    return res
-      .cookie("refresh-token", refreshToken, {
-        httpOnly: true,
-        secure: this.configService.getOrThrow<boolean>("isProduction"),
-        sameSite: "none",
-        expires: refreshTokenExpires
-      })
-      .json(TokenDTO.fromData(accessToken, accessTokenExpires));
+    return TokenDTO.fromData(accessToken, accessTokenExpires, refreshToken, refreshTokenExpires);
   }
 
   @ApiOperation({ summary: "withdraw", description: "withdraw for membership" })
@@ -142,21 +127,21 @@ export class AuthController {
 
   @ApiOperation({ summary: "issue access token", description: "issue new access token" })
   @ApiProduces("application/json")
+  @ApiBody({ type: IssueToken })
   @ApiOkResponse({ type: TokenDTO, description: "reissue has been successful" })
   @ApiCookieAuth()
   @Post("access-token")
   @HttpCode(HttpStatus.OK)
   public async reissue(
-    @Req() req: Request,
+    @Body() body: IssueToken,
   ) {
-    const refreshToken: string = req.cookies["refresh-token"];
     try {
-      const verify = this.authService.verifyRefreshToken(refreshToken);
+      const verify = this.authService.verifyRefreshToken(body.refreshToken);
       const memberId = parseInt(verify["sub"] as string, 10);
       const member = await this.memberService.getMemberById(memberId);
       const accessToken = this.authService.generateAccessToken(member);
       const accessTokenExpires = this.authService.getExpireDate(accessToken);
-      return TokenDTO.fromData(accessToken, accessTokenExpires);
+      return AccessTokenDTO.fromData(accessToken, accessTokenExpires);
     } catch (e) {
       throw new UnauthorizedException("Invalid token");
     }

@@ -77,7 +77,11 @@ export class ArticleController {
   public async readArticles(
     @Query("last", new ParseIntPipe({ optional: true })) lastId?: number,
   ) {
-    const articles = await this.articleService.readArticles(lastId);
+    let articles = await this.articleService.readArticles(lastId);
+    articles = articles.map((article) => {
+      article.content = this.articleService.extractParagraph(article.content);
+      return article;
+    })
     return articles.map((article) => ArticleDTO.fromEntity(article));
   }
 

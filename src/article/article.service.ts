@@ -12,6 +12,9 @@ import {
   Article,
   ArticleStatus,
 } from "src/entities";
+import type {
+  Block,
+} from "./blocknote";
 
 @Injectable()
 export class ArticleService {
@@ -70,5 +73,20 @@ export class ArticleService {
   public async deleteArticle(article: Article) {
     const result = await this.articleRepository.delete(article);
     return result.affected === 1;
+  }
+
+  public extractParagraph(content: string) {
+    const blocks: Block[] = JSON.parse(content);
+    return blocks
+      .map((block) => {
+        if (block.type === "paragraph" && Array.isArray(block.content)) {
+          return block.content
+            .filter((v) => v.type === "text")
+            .map((value) => value.text)
+            .join(" ");
+        }
+      })
+      .filter((v) => v != null)
+      .join(" ");
   }
 }

@@ -20,6 +20,7 @@ export abstract class DefaultEntity {
     type: "timestamptz",
     name: "updated_at",
     nullable: true,
+    onUpdate: "now()",
   })
   updatedAt: Date;
 }

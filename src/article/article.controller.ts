@@ -51,6 +51,15 @@ export class ArticleController {
     private readonly articleService: ArticleService,
   ) { }
 
+  @ApiOperation({ summary: "article info", description: "article info" })
+  @ApiOkResponse({ type: ArticleInfoDTO })
+  @Get("info")
+  @HttpCode(HttpStatus.OK)
+  public async getInfo() {
+    const info = await this.articleService.getInfo();
+    return ArticleInfoDTO.fromData(info.total);
+  }
+
   @ApiOperation({ summary: "write an ariticle", description: "write an article" })
   @ApiBearerAuth()
   @ApiConsumes("application/json")
@@ -150,14 +159,5 @@ export class ArticleController {
     }
     await this.articleService.deleteArticle(article);
     return;
-  }
-
-  @ApiOperation({ summary: "article info", description: "article info" })
-  @ApiOkResponse({ type: ArticleInfoDTO })
-  @Get("info")
-  @HttpCode(HttpStatus.OK)
-  public async getInfo() {
-    const info = await this.articleService.getInfo();
-    return ArticleInfoDTO.fromData(info.total);
   }
 }

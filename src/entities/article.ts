@@ -1,4 +1,6 @@
 import {
+  BeforeInsert,
+  BeforeUpdate,
   Column,
   Entity,
   JoinColumn,
@@ -57,4 +59,12 @@ export class Article extends DefaultEntity {
   @ManyToOne(() => Member, { nullable: false, onDelete: "CASCADE" })
   @JoinColumn({ name: "member_id" })
   member: Member;
+
+  @BeforeInsert()
+  @BeforeUpdate()
+  handlePublishedAt() {
+    if (this.status !== ArticleStatus.PUBLISHED) {
+      this.publishedAt = null;
+    }
+  }
 }

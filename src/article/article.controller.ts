@@ -38,6 +38,7 @@ import {
 } from "./article.service";
 import {
   ArticleDTO,
+  ArticleInfoDTO,
   UpdateArticleDTO,
   WriteArticleDTO,
 } from "./dto";
@@ -149,5 +150,14 @@ export class ArticleController {
     }
     await this.articleService.deleteArticle(article);
     return;
+  }
+
+  @ApiOperation({ summary: "article info", description: "article info" })
+  @ApiOkResponse({ type: ArticleInfoDTO })
+  @Get("info")
+  @HttpCode(HttpStatus.OK)
+  public async getInfo() {
+    const info = await this.articleService.getInfo();
+    return ArticleInfoDTO.fromData(info.total);
   }
 }

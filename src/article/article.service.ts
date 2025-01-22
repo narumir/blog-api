@@ -71,7 +71,7 @@ export class ArticleService {
   }
 
   public async deleteArticle(article: Article) {
-    const result = await this.articleRepository.delete(article);
+    const result = await this.articleRepository.delete({ id: article.id });
     return result.affected === 1;
   }
 
@@ -88,5 +88,12 @@ export class ArticleService {
       })
       .filter((v) => v != null)
       .join(" ");
+  }
+
+  public async getInfo() {
+    const total = await this.articleRepository.countBy({ status: ArticleStatus.PUBLISHED });
+    return {
+      total,
+    };
   }
 }

@@ -16,11 +16,14 @@ import {
   ValidationPipe,
 } from "@nestjs/common";
 import {
+  NestExpressApplication,
+} from "@nestjs/platform-express";
+import {
   AppModule,
 } from "./app.module";
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const configService = app.get(ConfigService);
   const port = configService.getOrThrow<number>("port");
   const isProduction = configService.getOrThrow<boolean>("isProduction");
@@ -36,6 +39,7 @@ async function bootstrap() {
     const documentFactory = () => SwaggerModule.createDocument(app, swaggerConfig);
     SwaggerModule.setup("/api", app, documentFactory);
   }
+  app.set('query parser', 'extended');
   app.enableCors({
     origin: (origin, callback) => {
       if (!origin || !configService.get<boolean>("isProduction")) {

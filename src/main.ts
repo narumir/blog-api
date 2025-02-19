@@ -24,11 +24,7 @@ import {
 } from "./app.module";
 
 async function bootstrap() {
-  const logger = new ConsoleLogger({
-    json: true,
-    colors: true,
-  });
-  const app = await NestFactory.create<NestExpressApplication>(AppModule, { logger, bufferLogs: true });
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, { bufferLogs: true });
   const configService = app.get(ConfigService);
   const port = configService.getOrThrow<number>("port");
   const isProduction = configService.getOrThrow<boolean>("isProduction");
@@ -44,6 +40,11 @@ async function bootstrap() {
     const documentFactory = () => SwaggerModule.createDocument(app, swaggerConfig);
     SwaggerModule.setup("/api", app, documentFactory);
   }
+  const logger = new ConsoleLogger({
+    json: true,
+    colors: !isProduction,
+  });
+  app.useLogger(logger);
   app
     .set("query parser", "extended")
     .set("trust proxy", true);
